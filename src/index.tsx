@@ -3,13 +3,26 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import {MantineProvider} from "@mantine/core";
+import {NotificationsProvider} from '@mantine/notifications';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <MantineProvider
+      withGlobalStyles
+      withNormalizeCSS
+      theme={{
+        // Override default theme
+        spacing: {xs: 10},
+      }}
+    >
+      <NotificationsProvider>
+        <App />
+      </NotificationsProvider>
+    </MantineProvider>
   </React.StrictMode>
 );
 
