@@ -3,6 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@mantine/core": "^5.8.4",
+    "@mantine/dates": "^5.8.4",
+    "@mantine/form": "^5.8.4",
+    "@mantine/hooks": "^5.8.4",
+    "@mantine/modals": "^5.8.4",
+    "@mantine/notifications": "^5.8.4",
+    "@mantine/nprogress": "^5.8.4",
+    "@mantine/prism": "^5.8.4",
+    "@mantine/spotlight": "^5.8.4",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -10,14 +20,14 @@
     "@types/node": "^16.18.4",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.9",
+    "axios": "^1.2.0",
+    "dayjs": "^1.11.6",
+    "got-scraping": "^3.2.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.3",
-    "web-vitals": "^2.1.4",
-
-    "got-scraping": "^3.2.12",
-    "axios": "^1.2.0"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
