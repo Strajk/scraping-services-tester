@@ -5,7 +5,7 @@ export function AboutCore () {
   return <>
     <p>You should always be <Mark><b>very cautious</b></Mark> when website asks you any tokens, but:</p>
     <ul>
-      <li>The whole code is <b>open-source</b> on <a href="https://github.com/strajk/proxychet">GitHub</a> – you can inspect it, or run it yourself on your machine.</li>
+      <li>The whole code is <b>open-source</b> on <a href="https://github.com/strajk/scraping-services-tester">GitHub</a> – you can inspect it, or run it yourself on your machine.</li>
       <li>It's a <b>static site</b> – everything is done in your browser, there's no server.</li>
       <li>There is <b>no analytics/tracking</b> – no possibility of accidentally leaking your tokens.</li>
       <li>Only browser's <b>Local storage</b> is used for storing the configuration for convenience.</li>

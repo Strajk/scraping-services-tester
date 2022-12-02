@@ -10,7 +10,7 @@ scrapingdog=s6386...
 scrapeowl=386a...
 
 # or URL pointing those, eg. on GitHub Gist (private!)
-https://gist.githubusercontent.com/…/proxychet.env
+https://gist.githubusercontent.com/…/scraping-services-tester.env
 `.trim()
 
 // clear empty lines and comments
