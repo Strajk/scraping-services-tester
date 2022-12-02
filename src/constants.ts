@@ -26,7 +26,13 @@ export const services: Services = {
     tokenPlaceholder: 'bkNb...',
     desc: '…',
     fn: async (url, token) => {
-
+      const endpoint = `https://apify-proxy-aas.fly.dev`
+      // const endpoint = `http://localhost:8080` // uncomment for local testing
+      return await fetch(`${endpoint}/scrape?` + new URLSearchParams({
+        apiKey: token,
+        targetUrl: url,
+        // TODO: More params
+      }))
     }
   },
   scrapingbee: {
