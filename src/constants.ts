@@ -4,6 +4,7 @@ import {FormTogglesValues, FormTokensValues, Services} from "./types";
 const genericTokenPlaceholder = `abc123...`
 
 export const examples = [
+  ['GitHub profile w/o protection', `https://api.github.com/users/strajk`],
   ['StarWars API w/o protection', 'https://swapi.dev/api/people/1/?format=json'],
   ['StockX API behind PerimeterX', 'https://stockx.com/api/products/a84b0299-c372-4828-b926-5579c076bdc6/activity?limit=10&page=1&sort=createdAt&order=DESC&state=480&currency=EUR&country=US'],
   ['Bike24 product behind Cloudflare', 'https://www.bike24.com/p2160000.html'],

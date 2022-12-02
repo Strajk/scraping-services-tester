@@ -336,6 +336,7 @@ function App() {
                     return (
                       <tr
                         key={`${result.service}-${result.timestamp}`}
+                        style={{cursor: 'pointer'}}
                         onClick={() => {
                           openModal({
                             title: `${serviceDef.name} at ${timestampFormatted}`,

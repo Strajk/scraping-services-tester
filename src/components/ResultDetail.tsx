@@ -14,7 +14,7 @@ export function ResultDetail({result}) {
       ? <Prism language="json" {...sharedProps}>{JSON.stringify(result.data, null, 2)}</Prism>
       : <Prism language="markup" {...sharedProps}>{result.text}</Prism>
     }
-    <Text size="xl" weight={500}>Headers</Text>
-    <Prism language="json" {...sharedProps}>{JSON.stringify(result.headers) ?? ''}</Prism>
+    <Text size="xl" weight={500} mt={24}>Headers</Text>
+    <Prism language="json" {...sharedProps}>{JSON.stringify(result.headers, null, 2) ?? ''}</Prism>
   </>
 }
