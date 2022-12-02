@@ -2,7 +2,7 @@ import React, {useMemo, useReducer} from 'react';
 import prettyBytes from 'pretty-bytes';
 import dayjs from "dayjs"
 import './App.css';
-import {Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Group, Stack, Table, Text, TextInput, Title} from "@mantine/core";
+import {Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Group, Loader, Stack, Table, Text, TextInput, Title} from "@mantine/core";
 import {useLocalStorage} from "@mantine/hooks";
 import {showNotification} from '@mantine/notifications';
 import {IconEyeCheck, IconEyeOff, IconRocket} from '@tabler/icons';
@@ -14,7 +14,7 @@ import {openModal} from "@mantine/modals";
 import {ResultDetail} from "./components/ResultDetail";
 import {About, AboutCore} from "./components/About";
 import {configInitial, examples, services, togglesInitial, tokensInitial} from "./constants";
-import {Action, ActionType, FormConfigValues, FormTogglesValues, FormTokensValues, Result} from "./types";
+import {Action, ActionType, FormConfigValues, FormTogglesValues, FormTokensValues, isResultError, isResultWhole, ResultCore, ResultWhole} from "./types";
 
 function App() {
   const [tokensInitialWithLS, setTokensToLS] = useLocalStorage({
@@ -40,16 +40,22 @@ function App() {
     switch (action.type) {
       case ActionType.Push:
         return [...state, action.payload];
+      case ActionType.Update:
+        // @ts-ignore
+        const desiredResult = state.find((result: ResultCore) => result.key === action.payload.key);
+        Object.assign(desiredResult, action.payload); // mutate in place
+        return [...state]; // Without cloning array, React won't re-render // TODO: Solve nicer! For perf is not an issue
       case ActionType.Clear:
         if (action.payload) {
-          return state.filter((item: Result) => item.service !== action.payload!.service);
+          // @ts-ignore
+          return state.filter((item: ResultCore) => item.service !== action.payload.service);
         }
         return [];
     }
   }, [])
 
   // derived structure for easier rendering
-  const resultsByService: { [key: string]: Result[] } = useMemo(() => {
+  const resultsByService: { [key: string]: ResultCore[] } = useMemo(() => {
     return results.reduce((acc, result) => {
       acc[result.service] ??= [];
       acc[result.service].push(result);
@@ -85,6 +91,8 @@ function App() {
     Promise.allSettled(selectedServices.map(async (service) => {
       const serviceDef = services[service];
       const token = valuesTokens[service];
+
+      // Handle invalid input
       if (!token && service !== 'fetch') {
         showNotification({
           title: `No token for ${serviceDef.name}`,
@@ -94,11 +102,28 @@ function App() {
         return;
       }
 
-      const timeStart = Date.now();
+      const timeStart = Date.now(); // number of milliseconds elapsed since epoch, should be unique
+      const timestamp = new Date(timeStart).toISOString();
+      const key = `${service}-${timeStart}`;
+      const partialResult = { key, service, timestamp }
+      dispatchResults({
+        type: ActionType.Push,
+        payload: partialResult
+      })
 
-      const res = await serviceDef.fn(valuesConfig.url, token);
-
-      // TODO: Handle both fetch response
+      // Main logic!
+      const res = await serviceDef.fn(valuesConfig.url, token)
+        .catch((err) => {
+          console.error(`💣 Error while fetching ${serviceDef.name}`, err);
+          dispatchResults({
+            type: ActionType.Update,
+            payload: {
+              ...partialResult,
+              duration: Date.now() - timeStart,
+              error: err.message,
+            }
+          })
+        });
 
       // get around `body stream already read` error
       // https://github.com/whatwg/fetch/issues/196#issuecomment-377918371
@@ -107,11 +132,9 @@ function App() {
       const text = await (res.clone()).text();
 
       dispatchResults({
-        type: ActionType.Push,
+        type: ActionType.Update,
         payload: {
-          service,
-          key: `${service}-${timeStart}`, // TODO: Add repeats
-          timestamp: new Date().toISOString(),
+          ...partialResult,
           duration: Date.now() - timeStart,
           status: res.status, // 200
           statusText: res.statusText, // OK
@@ -330,8 +353,45 @@ function App() {
               >
                 <tbody>
                 {results?.length
-                  ? results.map((result: any) => {
+                  ? results.map((result: ResultCore | ResultWhole) => {
                     const timestampFormatted = dayjs(result.timestamp).format('YYYY-MM-DD HH:mm:ss');
+
+                    // TODO: Smarter type guards
+                    if (!isResultWhole(result)) {
+                      return <tr
+                        key={`${result.service}-${result.timestamp}`}
+                        // no onClick nor style until it is full result
+                      >
+                        <td style={{width: 1}}>
+                          {timestampFormatted}
+                        </td>
+                        <td colSpan={99}>
+                          <Loader size="sm" variant="dots" style={{verticalAlign: 'middle'}}/>
+                        </td>
+                      </tr>
+                    }
+
+                    if (isResultError(result)) {
+                      return <tr
+                        key={`${result.service}-${result.timestamp}`}
+                        // no onClick nor style until it is full result
+                      >
+                        <td style={{width: 1}}>
+                          {timestampFormatted}
+                        </td>
+                        <td style={{width: 1}}>
+                          <Badge
+                            color={'red'}
+                            size="sm"
+                            title={result.error}
+                          >
+                            ERR
+                          </Badge>
+                        </td>
+                        <td><em>See console</em></td>
+                        <td colSpan={99}></td>
+                      </tr>
+                    }
 
                     return (
                       <tr
@@ -341,6 +401,7 @@ function App() {
                           openModal({
                             title: `${serviceDef.name} at ${timestampFormatted}`,
                             children: <ResultDetail result={result} />,
+                            size: 'xl',
                           })
                         }}
                       >

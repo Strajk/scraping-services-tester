@@ -4,10 +4,10 @@ import {FormTogglesValues, FormTokensValues, Services} from "./types";
 const genericTokenPlaceholder = `abc123...`
 
 export const examples = [
-  ['GitHub profile w/o protection', `https://api.github.com/users/strajk`],
-  ['StarWars API w/o protection', 'https://swapi.dev/api/people/1/?format=json'],
-  ['StockX API behind PerimeterX', 'https://stockx.com/api/products/a84b0299-c372-4828-b926-5579c076bdc6/activity?limit=10&page=1&sort=createdAt&order=DESC&state=480&currency=EUR&country=US'],
-  ['Bike24 product behind Cloudflare', 'https://www.bike24.com/p2160000.html'],
+  ['GitHub profile (no protection)', `https://api.github.com/users/strajk`],
+  ['StarWars API (no protection)', 'https://swapi.dev/api/people/1/?format=json'],
+  ['StockX API (PerimeterX)', 'https://stockx.com/api/products/a84b0299-c372-4828-b926-5579c076bdc6/activity?limit=10&page=1&sort=createdAt&order=DESC&state=480&currency=EUR&country=US'],
+  ['Bike24 product (Cloudflare)', 'https://www.bike24.com/p2160000.html'],
 ]
 
 export const services: Services = {
@@ -15,7 +15,9 @@ export const services: Services = {
     name: 'Native Fetch',
     desc: "…",
     fn: (url) => {
-      return fetch(url);
+      return fetch(url)
+        // uncomment the following line to slow down the response for testing
+        // .then((res) => new Promise((resolve) => setTimeout(() => resolve(res), 3000)))
     }
   },
   apify: {
@@ -79,7 +81,7 @@ export const services: Services = {
     desc: '…',
     fn: async (url, token) => {
       // https://www.scrapingowl.com/documentation
-      return fetch('https://api.scrapingowl.com/scrape?' + new URLSearchParams({
+      return fetch('https://api.scrapeowl.com/v1/scrape?' + new URLSearchParams({
         api_key: token,
         url,
         premium_proxies: 'true',
@@ -110,7 +112,11 @@ export const services: Services = {
     tokenPlaceholder: genericTokenPlaceholder,
     desc: '…',
     fn: async (url, token) => {
-
+      // https://www.scraperapi.com/documentation/
+      return fetch('http://api.scraperapi.com?' + new URLSearchParams({
+        api_key: token,
+        url,
+      }))
     }
   },
   zenrows: {
@@ -144,5 +150,5 @@ export const togglesInitial: FormTogglesValues = Object.entries(services).reduce
   fetch: true, // Enable 'fetch' service by default for more intuitive UX
 });
 export const configInitial = {
-  url: `https://swapi.dev/api/people/1/?format=json`,
+  url: `https://api.github.com/users/strajk`,
 };

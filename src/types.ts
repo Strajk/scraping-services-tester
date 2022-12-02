@@ -12,10 +12,18 @@ export interface Services {
   [key: string]: Service
 }
 
-export type Result = {
-  service: string;
+
+export type ResultCore = {
   key: string;
+  service: string;
   timestamp: string;
+}
+
+export type ResultError = ResultCore & {
+  error: string; // only on fetch failure, not return by the service
+}
+
+export type ResultUpdate = {
   duration: number;
   status: number;
   statusText: string;
@@ -25,15 +33,30 @@ export type Result = {
   data: any;
 }
 
+export type ResultWhole = ResultCore & ResultUpdate
+
+export const isResultWhole = (x: ResultCore): x is ResultWhole => {
+  return 'duration' in x
+}
+
+export const isResultError = (x: ResultCore): x is ResultError => {
+  return 'error' in x
+}
 
 export enum ActionType {
   Push = 'push',
+  Update = 'update',
   Clear = 'clear',
 }
 
+// TODO: better typing based on ActionType
 export interface Action {
   type: ActionType;
-  payload?: Result | { service: string }; // TODO: better typing based on ActionType
+  payload?: ResultCore
+    | ResultUpdate
+    | ResultError
+    | ResultWhole
+    | { service: string };
 }
 
 export type FormTokensValues = {
