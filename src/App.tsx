@@ -1,26 +1,46 @@
 import React, {useMemo, useReducer} from 'react';
 import prettyBytes from 'pretty-bytes';
+import fetchNoCors from "fetch-no-cors"
 import dayjs from "dayjs"
-import logo from './logo.svg';
 import './App.css';
-import {Checkbox, Group, Table, TextInput, Button, Stack, Badge, Loader, Text, Card, ThemeIcon} from "@mantine/core";
+import {Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Group, Stack, Table, Text, TextInput, Title} from "@mantine/core";
 import {useLocalStorage} from "@mantine/hooks";
 import {showNotification} from '@mantine/notifications';
+import {IconEyeCheck, IconEyeOff, IconRocket} from '@tabler/icons';
 
 import {useForm} from "@mantine/form";
+import {prettyData, statusColor} from "./utils";
+import {TokensImport} from "./components/TokensImport";
+import {openModal} from "@mantine/modals";
+import {ResultDetail} from "./components/ResultDetail";
+import {About, AboutCore} from "./components/About";
 
-type FormServicesValues = {
-  [key: string]: string | boolean;
+const genericTokenPlaceholder = `abc123...`
+
+interface Service {
+  name: string
+  desc: string
+  fn: any,
+  tokenLength?: number
+  tokenRegex?: RegExp
+  tokenHint?: string
+  tokenPlaceholder?: string
+
 }
 
-type FormConfigValues = {
-  repeat: number;
-  url: string;
+interface Services {
+  [key: string]: Service
 }
 
-const services = {
+const examples = [
+  ['StarWars API w/o protection', 'https://swapi.dev/api/people/1/?format=json'],
+  ['StockX API behind PerimeterX', 'https://stockx.com/api/products/a84b0299-c372-4828-b926-5579c076bdc6/activity?limit=10&page=1&sort=createdAt&order=DESC&state=480&currency=EUR&country=US'],
+  ['Bike24 product behind Cloudflare', 'https://www.bike24.com/p2160000.html'],
+]
+
+const services: Services = {
   fetch: {
-    name: 'Fetch',
+    name: 'Native Fetch',
     desc: "…",
     fn: (url) => {
       return fetch(url);
@@ -31,6 +51,7 @@ const services = {
     tokenLength: 25,
     tokenRegex: /^[a-zA-Z]{25}$/,
     tokenHint: '25 chars long, lowercase and uppercase letters',
+    tokenPlaceholder: 'bkNb...',
     desc: '…',
     fn: async (url, token) => {
 
@@ -42,6 +63,7 @@ const services = {
     tokenLength: 80,
     tokenRegex: /^[A-Z0-9]{80}$/,
     tokenHint: '80 chars long, uppercase letters and numbers',
+    tokenPlaceholder: 'IG6CGY...',
     fn: async (url, token) => {
       // https://www.scrapingbee.com/documentation/
       return fetch('https://app.scrapingbee.com/api/v1?' + new URLSearchParams({
@@ -58,6 +80,7 @@ const services = {
     tokenLength: 25,
     tokenRegex: /^[a-z0-9]{25}$/,
     tokenHint: '25 chars long, lowercase letters and numbers',
+    tokenPlaceholder: 's6386...',
     desc: '…',
     fn: async (url, token) => {
       // https://www.scrapingdog.com/documentation
@@ -74,6 +97,7 @@ const services = {
     tokenLength: 30,
     tokenRegex: /^[a-z0-9]{30}$/,
     tokenHint: '30 chars long, lowercase letters and numbers',
+    tokenPlaceholder: '386a...',
     desc: '…',
     fn: async (url, token) => {
       // https://www.scrapingowl.com/documentation
@@ -105,6 +129,7 @@ const services = {
   },
   scraperapi: {
     name: 'ScraperAPI',
+    tokenPlaceholder: genericTokenPlaceholder,
     desc: '…',
     fn: async (url, token) => {
 
@@ -112,67 +137,107 @@ const services = {
   },
   zenrows: {
     name: 'ZenRows',
+    tokenLength: 40,
+    tokenRegex: /^[a-z0-9]{40}$/,
+    tokenHint: '40 chars long, lowercase letters and numbers',
+    tokenPlaceholder: '739a...',
     desc: '…',
     fn: async (url, token) => {
+      // https://www.zenrows.com/documentation#overview-node
+      // https://app.zenrows.com/builder
+      return fetchNoCors('https://api.zenrows.com/v1/?' + new URLSearchParams({
+        apikey: token, // beware: all lowercase!
+        url,
+        premium_proxy: 'false',
+        antibot: 'false', // TODO: Enable with paid plan tokens
+      }))
 
     }
   },
 }
 
-const servicesInitial: FormServicesValues = Object.entries(services).reduce((acc, [key, value]) => {
-  // @ts-ignore
-  acc[`${key}-ENABLED`] ??= false;
-  // @ts-ignore
-  acc[`${key}-TOKEN`] = '';
-  return acc;
-}, {
-  'fetch-ENABLED': true,
-});
-const configInitial = {
-  repeat: 0,
-  url: `https://swapi.dev/api/people/1/?format=json`,
-};
 
-function statusColor(status: number) {
-  if (status >= 200 && status < 300) {
-    return 'teal';
-  } else if (status >= 300 && status < 400) {
-    return 'yellow';
-  } else if (status >= 400 && status < 500) {
-    return 'orange';
-  }
-  return 'red';
+type FormTokensValues = {
+  [key: string]: string; // TODO: keyof services
+}
+
+type FormTogglesValues = {
+  [key: string]: boolean; // TODO: keyof services
+}
+
+type FormConfigValues = {
+  url: string;
 }
 
 type Result = {
   service: string;
   key: string;
-  timestamp: number;
+  timestamp: string;
   duration: number;
   status: number;
   statusText: string;
   contentLength: number | undefined;
   headers: Record<string, string>;
+  text: string | undefined;
   data: any;
 }
 
-function prettyData(data) {
-  return Array.isArray(data)
-    ? `${data.length} items`
-    : typeof data === 'object'
-      ? `${Object.keys(data).length} keys`
-      : 'unknown'
+const tokensInitial: FormTokensValues = Object.entries(services).reduce((acc, [key, value]) => {
+  acc[key] = '';
+  return acc;
+}, {});
 
+const togglesInitial: FormTogglesValues = Object.entries(services).reduce((acc, [key, value]) => {
+  acc[key] ??= false;
+  return acc;
+}, {
+  fetch: true, // Enable 'fetch' service by default for more intuitive UX
+});
+
+const configInitial = {
+  url: `https://swapi.dev/api/people/1/?format=json`,
+};
+
+enum ActionType {
+  Push = 'push',
+  Clear = 'clear',
+}
+
+interface Action {
+  type: ActionType;
+  payload?: Result | { service: string }; // TODO: better typing based on ActionType
 }
 
 function App() {
-
-  const [value, setValueStorage] = useLocalStorage({key: 'services', defaultValue: servicesInitial});
-  const formServices = useForm<FormServicesValues>({initialValues: value});
+  const [tokensInitialWithLS, setTokensToLS] = useLocalStorage({
+    key: 'tokens', // local storage key
+    defaultValue: tokensInitial, // this will effectively merge saved tokens with default tokens
+    getInitialValueInEffect: false // https://github.com/mantinedev/mantine/issues/2266
+  }); //
+  const formTokens = useForm<FormTokensValues>({initialValues: tokensInitialWithLS});
+  const formToggles = useForm<FormTogglesValues>({initialValues: togglesInitial});
   const formConfig = useForm<FormConfigValues>({initialValues: configInitial})
+  const [ isLoading, setIsLoading ] = React.useState(false);
+  const [ hideTokes, setHideTokens ] = React.useState(false); // TODO: Maybe also separate loadings for each service
 
-  const [results, pushResult] = useReducer((state: any, action: any) => {
-    return [action, ...state];
+  const selectedServices = useMemo(() => {
+    return Object.entries(formToggles.values)
+      .filter(([key, value]) => value)
+      .map(([key, value]) => key);
+  }, [formToggles.values]);
+
+  /* RESULTS */
+  // TODO: Refactor
+  const [ results, dispatchResults ] = useReducer((state: any, action: Action) => {
+    switch (action.type) {
+      case ActionType.Push:
+        return [...state, action.payload];
+      case ActionType.Clear:
+        if (action.payload) {
+          return state.filter((item: Result) => item.service !== action.payload!.service);
+        }
+        return [];
+    }
   }, [])
 
   // derived view for easier rendering
@@ -187,37 +252,20 @@ function App() {
     }, {});
   }, [results]);
 
-  const configImportPrompt = async () => {
-    const input = window.prompt('Input URL with config in .env format', 'https://gist.githubusercontent.com/.../proxychet.env');
-    if (!input) return;
-    if (!input.startsWith('http')) {
-      window.alert('Not a valid URL');
-      return;
-    }
-    const res = await fetch(input);
-    if (!res.ok) {
-      window.alert('Error fetching config');
-      return;
-    }
-    const text = await res.text();
-    const lines = text.split('\n');
-    const config = lines.reduce((acc, line) => {
-      const [key, value] = line.split('=');
-      if (!key || !value) return acc;
-      acc[key + '-ENABLED'] = true;
-      acc[key + '-TOKEN'] = value;
-      return acc;
-    }, {});
-    formServices.setValues(config);
-  }
+  const tokensImportPrompt = () =>
+    openModal({
+      title: 'Import tokens',
+      size: 'xl',
+      children: <TokensImport
+        passValues={(values) => formTokens.setValues(values)}
+      />
+    })
 
-  const onSubmit = async () => {
-    const {values: valuesServices} = formServices;
+  const handleSubmit = async () => {
+    const {values: valuesTokens} = formTokens;
+    const {values: valuesToggles} = formToggles; // eslint-disable-line @typescript-eslint/no-unused-vars
     const {values: valuesConfig} = formConfig;
-    setValueStorage(valuesServices); // save services to local storage, not config
-    const selectedServices = Object.entries(services)
-      .filter(([key, val]) => valuesServices[key + '-ENABLED'] === true) // TODO: Document
-      .map(([key, val]) => key); // FIXME
+    setTokensToLS(valuesTokens); // save services to local storage, not config
 
     if (!selectedServices.length) {
       showNotification({
@@ -228,13 +276,22 @@ function App() {
       return;
     }
 
-    await Promise.all(selectedServices.map(async (service) => {
-      // @ts-ignore
+    setIsLoading(true);
+    Promise.allSettled(selectedServices.map(async (service) => {
       const serviceDef = services[service];
+      const token = valuesTokens[service];
+      if (!token && service !== 'fetch') {
+        showNotification({
+          title: `No token for ${serviceDef.name}`,
+          message: 'Please provide a token',
+          color: 'red',
+        })
+        return;
+      }
 
       const timeStart = Date.now();
 
-      const res = await serviceDef.fn(valuesConfig.url, valuesServices[service + '-TOKEN']);
+      const res = await serviceDef.fn(valuesConfig.url, token);
 
       // TODO: Handle both fetch response
 
@@ -242,21 +299,40 @@ function App() {
       // https://github.com/whatwg/fetch/issues/196#issuecomment-377918371
       const blob = await (res.clone()).blob();
       const data = await (res.clone()).json();
+      const text = await (res.clone()).text();
 
-      pushResult({
-        service,
-        key: `${service}-${timeStart}`, // TODO: Add repeats
-        timestamp: new Date().toISOString(),
-        duration: Date.now() - timeStart,
-        status: res.status, // 200
-        statusText: res.statusText, // OK
-        contentLength: res.headers.get('content-length')
-          ? Number(res.headers.get('content-length'))
-          : blob.size,
-        headers: Object.fromEntries(res.headers.entries()),
-        data
+      dispatchResults({
+        type: ActionType.Push,
+        payload: {
+          service,
+          key: `${service}-${timeStart}`, // TODO: Add repeats
+          timestamp: new Date().toISOString(),
+          duration: Date.now() - timeStart,
+          status: res.status, // 200
+          statusText: res.statusText, // OK
+          contentLength: res.headers.get('content-length')
+            ? Number(res.headers.get('content-length'))
+            : blob.size,
+          headers: Object.fromEntries(res.headers.entries()),
+          text,
+          data
+        }
       });
-    }))
+    })).finally(() => {
+      setIsLoading(false);
+    })
+  }
+
+  const handleReset = () => {
+    window.location.reload();
+  }
+
+  const openAbout = () => {
+    openModal({
+      title: 'About this project',
+      size: 'xl',
+      children: <About />
+    })
   }
 
   const rows = Object.entries(services).map(([serviceId, serviceVal]) => (
@@ -264,32 +340,62 @@ function App() {
       <td>
         <Checkbox
           style={{display: 'flex'}} /* to fix vertical align */
-          {...formServices.getInputProps(serviceId + '-ENABLED')}
-          checked={formServices.values[serviceId + '-ENABLED']} /* This seems unintuitive */
+          {...formToggles.getInputProps(serviceId)}
+          checked={formToggles.values[serviceId]} /* this seems unintuitive but is needed for checkbox to work */
         />
       </td>
       <td>{serviceVal.name}</td>
       <td>
-        <TextInput
+        {serviceId === 'fetch' ? <TextInput
           size="xs"
-          {...formServices.getInputProps(`${serviceId}-TOKEN`)}
-        />
+          value="Token not applicable, it's just native browse's fetch API"
+          disabled
+        /> : <TextInput
+          size="xs"
+          type={hideTokes ? 'password' : 'text'}
+          placeholder={serviceVal.tokenPlaceholder}
+          {...formTokens.getInputProps(serviceId)}
+        />}
       </td>
     </tr>
   ));
 
+  function clear(serviceId?: string) {
+    dispatchResults({
+      type: ActionType.Clear,
+      payload: serviceId ? {service: serviceId} : undefined,
+    })
+
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        {/*<img src={logo} className="App-logo" alt="logo" />*/}
+    <Container className="App">
 
-        <p>
+        {/* TODO: Polish */}
+        <Title order={1} mt={8}>Scraping services tester</Title>
+        <Text color="dimmed" size="sm">Test various scraping/proxy services against specified URL</Text>
 
-        </p>
+        <Accordion variant="contained" defaultValue="about" mt={8}>
+          <Accordion.Item value="about">
+            <Accordion.Control
+              style={{
+                paddingTop: 16 - 4,
+                paddingBottom: 16 - 4,
+                fontSize: 14,
+              }}
+            >
+              <b>🥷 Why it's ok to input your precious tokens</b>
+              {" "}
+              <a href="#" onClick={() => openAbout()}>Read more</a>
+            </Accordion.Control>
+            <Accordion.Panel><AboutCore /></Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
 
         {/* Input */}
         <Stack
           spacing="xs"
+          mt={12}
         >
 
           {/* Services */}
@@ -299,9 +405,23 @@ function App() {
               <th style={{width: 1}}></th>
               <th style={{width: 1}}>Service</th>
               <th>
-                Credentials
-                {" "}
-                <a href="#" onClick={configImportPrompt}>Import</a>
+                <Group position="apart">
+                  <span>
+                    Credentials
+                    {" "}
+                    <a href="#" onClick={tokensImportPrompt}>Import</a>
+                  </span>
+                  <span>
+                    <ActionIcon
+                      size={20}
+                      display="inline-flex"
+                      style={{verticalAlign: 'text-bottom'}}
+                      onClick={() => setHideTokens(!hideTokes)}
+                    >
+                      {hideTokes ? <IconEyeOff size={20} /> : <IconEyeCheck size={20} />}
+                    </ActionIcon>
+                  </span>
+                </Group>
               </th>
             </tr>
             </thead>
@@ -312,20 +432,71 @@ function App() {
           <TextInput
             name="url"
             {...formConfig.getInputProps('url')}
+            styles={(theme) => ({
+              "input" : {
+                border: '2px solid #228be6'
+              }
+            })}
           />
+          <Text lineClamp={2} size={"xs"} mt={-4}>
+            <b>Try: </b>
+            {examples.map(([title, url], i) => (
+              <>
+                <a
+                  href="#"
+                  style={{textDecoration: 'none'}}
+                  onClick={() => formConfig.setValues({url})}
+                >
+                  {title}
+                </a>
+                {i !== examples.length - 1 ? ' • ' : ''}
+              </>
+            ))}
+          </Text>
+
 
           {/* Actions */}
           <Group position="apart" spacing="xs" grow>
-            <Button variant="outline">Reset</Button>
-            <Button variant="outline">Config</Button>
-            <Button variant="filled" onClick={onSubmit}>Submit</Button>
-          </Group>
+            <Button
+              variant="subtle"
+              color="red"
+              onClick={handleReset}
+            >
+              Reset
+            </Button>
 
+            {/* TODO: Config */}
+            {/*<Button
+              variant="outline"
+              color="dark"
+              onClick={handleConfig}
+            >
+              Config
+            </Button>*/}
+
+            <Button
+              variant="filled"
+              color="dark"
+              onClick={handleSubmit}
+              loading={isLoading}
+              rightIcon={<IconRocket size={20} />}
+            >
+              Send requests
+            </Button>
+          </Group>
         </Stack>
 
+        <Divider
+          mt="xl"
+          mb="xs"
+          label="Responses"
+          labelPosition="center"
+        />
+
         {/* Results */}
-        {Object.entries(resultsByService).map(([serviceId, results]) => {
+        {selectedServices.map((serviceId) => {
           const serviceDef = services[serviceId];
+          const results = resultsByService[serviceId] ?? [];
           return (
             <Card
               shadow="sm"
@@ -334,44 +505,71 @@ function App() {
               withBorder
               key={serviceId}
             >
-              <Group position="apart" mt="md" mb="xs">
+              <Group position="apart">
                 <Text weight={500}>{serviceDef.name}</Text>
-                {/*<Loader size="sm" />*/}
+                <Button
+                  variant="subtle"
+                  size="xs"
+                  color="gray"
+                  onClick={() => clear(serviceId)}
+                >Clear</Button>
               </Group>
 
-              <Table striped highlightOnHover withBorder style={{whiteSpace: 'nowrap'}}>
+              <Table
+                striped highlightOnHover withBorder
+                mt="xs"
+                style={{whiteSpace: 'nowrap'}}
+              >
                 <tbody>
-                {results.map((result: any) => (
-                  <tr key={`${result.service}-${result.timestamp}`}>
-                    <td style={{width: 1}}>
-                      {dayjs(result.timestamp).format('YYYY-MM-DD HH:mm:ss')}
-                    </td>
-                    <td style={{width: 1}}>
-                      <Badge
-                        color={statusColor(result.status)}
-                        size="sm"
-                        title={result.statusText}
+                {results?.length
+                  ? results.map((result: any) => {
+                    const timestampFormatted = dayjs(result.timestamp).format('YYYY-MM-DD HH:mm:ss');
+
+                    return (
+                      <tr
+                        key={`${result.service}-${result.timestamp}`}
+                        onClick={() => {
+                          openModal({
+                            title: `${serviceDef.name} at ${timestampFormatted}`,
+                            children: <ResultDetail result={result} />,
+                          })
+                        }}
                       >
-                        {result.status}
-                      </Badge>
-                    </td>
-                    <td style={{width: 120}}>
-                      {result.duration} ms
-                    </td>
-                    <td style={{width: 120}}>
-                      {result.contentLength ? prettyBytes(result.contentLength) : '-'}
-                    </td>
-                    <td>{prettyData(result.data)}</td>
-                  </tr>
-                ))}
+                        <td style={{width: 1}}>
+                          {timestampFormatted}
+                        </td>
+                        <td style={{width: 1}}>
+                          <Badge
+                            color={statusColor(result.status)}
+                            size="sm"
+                            title={result.statusText}
+                          >
+                            {result.status}
+                          </Badge>
+                        </td>
+                        <td style={{width: 120}}>
+                          {result.duration} ms
+                        </td>
+                        <td style={{width: 120}}>
+                          {result.contentLength ? prettyBytes(result.contentLength) : '-'}
+                        </td>
+                        <td>{prettyData(result.data)}</td>
+                        <td>{Object.keys(result.headers).length} headers</td>
+                      </tr>
+                    );
+                  })
+                  : <tr>
+                    <td colSpan={99}>No results yet</td>
+                  </tr>}
                 </tbody>
               </Table>
             </Card>
-
           );
         })}
-      </header>
-    </div>
+
+        {/* Uncomment for easier development */}
+        {/* <About /> */}
+    </Container>
   );
 }
 

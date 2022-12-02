@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {MantineProvider} from "@mantine/core";
 import {NotificationsProvider} from '@mantine/notifications';
+import {ModalsProvider} from '@mantine/modals';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -19,9 +20,11 @@ root.render(
         spacing: {xs: 10},
       }}
     >
-      <NotificationsProvider>
-        <App />
-      </NotificationsProvider>
+      <ModalsProvider>
+        <NotificationsProvider>
+          <App />
+        </NotificationsProvider>
+      </ModalsProvider>
     </MantineProvider>
   </React.StrictMode>
 );
