@@ -1,5 +1,6 @@
 export interface Service {
   name: string
+  link?: string
   desc: string
   fn: any,
   tokenLength?: number
@@ -11,7 +12,6 @@ export interface Service {
 export interface Services {
   [key: string]: Service
 }
-
 
 export type ResultCore = {
   key: string;

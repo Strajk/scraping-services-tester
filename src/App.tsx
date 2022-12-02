@@ -172,7 +172,17 @@ function App() {
           checked={formToggles.values[serviceId]} /* this seems unintuitive but is needed for checkbox to work */
         />
       </td>
-      <td>{serviceVal.name}</td>
+      <td>
+        {serviceVal.link
+          ? <a
+            href={serviceVal.link}
+            target="_blank"
+            rel="noreferrer"
+            title={`Affiliate link to ${serviceVal.name}`}
+          >{serviceVal.name}</a>
+          : serviceVal.name
+        }
+      </td>
       <td>
         {serviceId === 'fetch' ? <TextInput
           size="xs"
@@ -207,6 +217,7 @@ function App() {
           <Accordion.Item value="about">
             <Accordion.Control
               style={{
+                // tighten up
                 paddingTop: 16 - 4,
                 paddingBottom: 16 - 4,
                 fontSize: 14,

@@ -11,6 +11,7 @@ export function AboutCore() {
       <li>Only browser's <b>Local storage</b> is used for storing the configuration for convenience.</li>
       <li>It's a <b>personal project</b> solving my own problem – there's no evil company behind it.</li>
     </ul>
+    <p><small>Some links to services are affiliate links</small></p>
   </>
 }
 
