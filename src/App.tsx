@@ -41,14 +41,13 @@ function App() {
       case ActionType.Push:
         return [...state, action.payload];
       case ActionType.Update:
-        // @ts-ignore
         const desiredResult = state.find((result: ResultCore) => result.key === action.payload.key);
         Object.assign(desiredResult, action.payload); // mutate in place
         return [...state]; // Without cloning array, React won't re-render // TODO: Solve nicer! For perf is not an issue
       case ActionType.Clear:
         if (action.payload) {
-          // @ts-ignore
-          return state.filter((item: ResultCore) => item.service !== action.payload.service);
+          // TODO: Investigate why `payload!` is needed, even though it's checked above
+          return state.filter((item: ResultCore) => item.service !== action.payload!.service);
         }
         return [];
     }
@@ -203,7 +202,6 @@ function App() {
       type: ActionType.Clear,
       payload: serviceId ? {service: serviceId} : undefined,
     })
-
   }
 
   return (

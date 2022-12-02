@@ -49,15 +49,10 @@ export enum ActionType {
   Clear = 'clear',
 }
 
-// TODO: better typing based on ActionType
-export interface Action {
-  type: ActionType;
-  payload?: ResultCore
-    | ResultUpdate
-    | ResultError
-    | ResultWhole
-    | { service: string };
-}
+export type Action =
+  | { type: ActionType.Push, payload: ResultCore }
+  | { type: ActionType.Update, payload: ResultError | ResultWhole }
+  | { type: ActionType.Clear, payload?: { service: string } }
 
 export type FormTokensValues = {
   [key: string]: string; // TODO: keyof services
