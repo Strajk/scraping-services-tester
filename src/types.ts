@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export interface Service {
   name: string
   link?: string
@@ -36,17 +37,17 @@ export type ResultUpdate = {
 export type ResultWhole = ResultCore & ResultUpdate
 
 export const isResultWhole = (x: ResultCore): x is ResultWhole => {
-  return 'duration' in x
+  return "duration" in x
 }
 
 export const isResultError = (x: ResultCore): x is ResultError => {
-  return 'error' in x
+  return "error" in x
 }
 
 export enum ActionType {
-  Push = 'push',
-  Update = 'update',
-  Clear = 'clear',
+  Push = "push",
+  Update = "update",
+  Clear = "clear",
 }
 
 export type Action =

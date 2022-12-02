@@ -1,7 +1,8 @@
 {
-  "name": "proxychet",
+  "name": "scraping-services-tester",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://strajk.github.io/scraping-services-tester",
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@mantine/core": "^5.8.4",
@@ -24,6 +25,7 @@
     "axios": "^1.2.0",
     "dayjs": "^1.11.6",
     "fetch-no-cors": "^1.0.13",
+    "gh-pages": "^4.0.0",
     "got-scraping": "^3.2.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -35,9 +37,10 @@
     "eslint-config-strajk": "0.0.6"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
   "browserslist": {
