@@ -191,7 +191,10 @@ function App() {
             >
               <b>🥷 Why it's ok to input your precious tokens</b>
               {" "}
-              <a href="#" onClick={() => openAbout()}>Read more</a>
+              <a href="#" onClick={(ev) => {
+                openAbout();
+                ev.stopPropagation(); // prevent accordion from toggling
+              }}>Read more</a>
             </Accordion.Control>
             <Accordion.Panel><AboutCore /></Accordion.Panel>
           </Accordion.Item>
