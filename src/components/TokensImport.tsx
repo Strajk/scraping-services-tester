@@ -1,6 +1,6 @@
-import React from 'react';
-import {Button, Textarea} from "@mantine/core";
-import {closeAllModals} from '@mantine/modals';
+import React from "react"
+import { Button, Textarea } from "@mantine/core"
+import { closeAllModals } from "@mantine/modals"
 
 const placeholder = `
 # tokens in .env file format – one token per service per line
@@ -14,46 +14,46 @@ https://gist.githubusercontent.com/…/proxychet.env
 `.trim()
 
 // clear empty lines and comments
-function clear(input: string) {
-  return input.split('\n').filter(line => {
-    let trimmed = line.trim();
-    return trimmed.length > 0 && !trimmed.startsWith('#')
-  }).join('\n');
+function clear (input: string) {
+  return input.split("\n").filter(line => {
+    const trimmed = line.trim()
+    return trimmed.length > 0 && !trimmed.startsWith("#")
+  }).join("\n")
 }
 
-export function TokensImport({passValues}) {
-  const [input, setInput] = React.useState('')
+export function TokensImport ({ passValues }) {
+  const [input, setInput] = React.useState("")
 
-  async function process() {
+  async function process () {
     let cleared = clear(input)
-    if (!cleared) return; // nothing to do
-    if (cleared.startsWith('http')) {
-      const res = await fetch(cleared);
+    if (!cleared) return // nothing to do
+    if (cleared.startsWith("http")) {
+      const res = await fetch(cleared)
       if (!res.ok) {
-        window.alert('Error fetching config'); // TODO: Toasts
-        return;
+        window.alert("Error fetching config") // TODO: Toasts
+        return
       }
-      const text = await res.text();
-      cleared = clear(text);
+      const text = await res.text()
+      cleared = clear(text)
     }
 
     // Poor man's .env file parsing
-    const lines = cleared.split('\n');
+    const lines = cleared.split("\n")
     const config = lines.reduce((acc, line) => {
-      const [key, value] = line.split('=');
-      if (!key || !value) return acc;
-      acc[key] = value;
-      return acc;
-    }, {});
+      const [key, value] = line.split("=")
+      if (!key || !value) return acc
+      acc[key] = value
+      return acc
+    }, {})
 
-    passValues(config);
-    closeAllModals();
+    passValues(config)
+    closeAllModals()
   }
 
   return <>
     <Textarea
       placeholder={placeholder}
-      minRows={placeholder.split('\n').length + 2}
+      minRows={placeholder.split("\n").length + 2} /* +2 for padding */
       data-autofocus
       value={input}
       onChange={e => setInput(e.currentTarget.value)}

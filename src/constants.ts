@@ -1,94 +1,94 @@
 import fetchNoCors from "fetch-no-cors"
-import {FormTogglesValues, FormTokensValues, Services} from "./types";
+import { FormTogglesValues, FormTokensValues, Services } from "./types"
 
-const genericTokenPlaceholder = `abc123...`
+const genericTokenPlaceholder = "abc123..."
 
 export const examples = [
-  ['GitHub profile (no protection)', `https://api.github.com/users/strajk`],
-  ['StarWars API (no protection)', 'https://swapi.dev/api/people/1/?format=json'],
-  ['StockX API (PerimeterX)', 'https://stockx.com/api/products/a84b0299-c372-4828-b926-5579c076bdc6/activity?limit=10&page=1&sort=createdAt&order=DESC&state=480&currency=EUR&country=US'],
-  ['Bike24 product (Cloudflare)', 'https://www.bike24.com/p2160000.html'],
+  ["GitHub profile (no protection)", "https://api.github.com/users/strajk"],
+  ["StarWars API (no protection)", "https://swapi.dev/api/people/1/?format=json"],
+  ["StockX API (PerimeterX)", "https://stockx.com/api/products/a84b0299-c372-4828-b926-5579c076bdc6/activity?limit=10&page=1&sort=createdAt&order=DESC&state=480&currency=EUR&country=US"],
+  ["Bike24 product (Cloudflare)", "https://www.bike24.com/p2160000.html"],
 ]
 
 export const services: Services = {
   fetch: {
-    name: 'Native Fetch',
+    name: "Native Fetch",
     desc: "…",
     fn: (url) => {
       return fetch(url)
-        // uncomment the following line to slow down the response for testing
-        // .then((res) => new Promise((resolve) => setTimeout(() => resolve(res), 3000)))
-    }
+      // uncomment the following line to slow down the response for testing
+      // .then((res) => new Promise((resolve) => setTimeout(() => resolve(res), 3000)))
+    },
   },
   apify: {
-    name: 'Apify',
-    link: 'https://www.apify.com?fpr=1kxqp',
+    name: "Apify",
+    link: "https://www.apify.com?fpr=1kxqp",
     tokenLength: 25,
     tokenRegex: /^[a-zA-Z]{25}$/,
-    tokenHint: '25 chars long, lowercase and uppercase letters',
-    tokenPlaceholder: 'bkNb...',
-    desc: '…',
+    tokenHint: "25 chars long, lowercase and uppercase letters",
+    tokenPlaceholder: "bkNb...",
+    desc: "…",
     fn: async (url, token) => {
-      const endpoint = `https://apify-proxy-aas.fly.dev`
+      const endpoint = "https://apify-proxy-aas.fly.dev"
       // const endpoint = `http://localhost:8080` // uncomment for local testing
       return await fetch(`${endpoint}/scrape?` + new URLSearchParams({
         apiKey: token,
         targetUrl: url,
         // TODO: More params
       }))
-    }
+    },
   },
   scrapingbee: {
-    name: 'ScrapingBee',
-    link: 'https://www.scrapingbee.com/', // TODO: Add affiliate, already registered
-    desc: '…',
+    name: "ScrapingBee",
+    link: "https://www.scrapingbee.com/", // TODO: Add affiliate, already registered
+    desc: "…",
     tokenLength: 80,
     tokenRegex: /^[A-Z0-9]{80}$/,
-    tokenHint: '80 chars long, uppercase letters and numbers',
-    tokenPlaceholder: 'IG6CGY...',
+    tokenHint: "80 chars long, uppercase letters and numbers",
+    tokenPlaceholder: "IG6CGY...",
     fn: async (url, token) => {
       // https://www.scrapingbee.com/documentation/
-      return fetch('https://app.scrapingbee.com/api/v1?' + new URLSearchParams({
+      return fetch("https://app.scrapingbee.com/api/v1?" + new URLSearchParams({
         api_key: token,
         url,
         // premium_proxy: 'true',
         // stealth_proxy: 'true',
         // country_code: 'us',
       }))
-    }
+    },
   },
   scrapingdog: {
-    name: 'ScrapingDog',
-    link: 'https://www.scrapingdog.com/?deal=pavel81',
+    name: "ScrapingDog",
+    link: "https://www.scrapingdog.com/?deal=pavel81",
     tokenLength: 25,
     tokenRegex: /^[a-z0-9]{25}$/,
-    tokenHint: '25 chars long, lowercase letters and numbers',
-    tokenPlaceholder: 's6386...',
-    desc: '…',
+    tokenHint: "25 chars long, lowercase letters and numbers",
+    tokenPlaceholder: "s6386...",
+    desc: "…",
     fn: async (url, token) => {
       // https://www.scrapingdog.com/documentation
-      return fetch('https://api.scrapingdog.com/scrape?' + new URLSearchParams({
+      return fetch("https://api.scrapingdog.com/scrape?" + new URLSearchParams({
         api_key: token,
         url,
-        dynamic: 'false',
-        premium: '', // TODO: 'yes' or 'true', string according to docs
+        dynamic: "false",
+        premium: "", // TODO: 'yes' or 'true', string according to docs
       }))
-    }
+    },
   },
   scrapingowl: {
-    name: 'ScrapingOwl',
-    link: 'https://scrapeowl.com/', // No affiliate
+    name: "ScrapingOwl",
+    link: "https://scrapeowl.com/", // No affiliate
     tokenLength: 30,
     tokenRegex: /^[a-z0-9]{30}$/,
-    tokenHint: '30 chars long, lowercase letters and numbers',
-    tokenPlaceholder: '386a...',
-    desc: '…',
+    tokenHint: "30 chars long, lowercase letters and numbers",
+    tokenPlaceholder: "386a...",
+    desc: "…",
     fn: async (url, token) => {
       // https://www.scrapingowl.com/documentation
-      return fetch('https://api.scrapeowl.com/v1/scrape?' + new URLSearchParams({
+      return fetch("https://api.scrapeowl.com/v1/scrape?" + new URLSearchParams({
         api_key: token,
         url,
-        premium_proxies: 'true',
+        premium_proxies: "true",
         /*
         [
           "br",
@@ -107,54 +107,53 @@ export const services: Services = {
           "us"
         ]
         */
-        country: 'us', // TODO: 'yes' or 'true', string according to docs
+        country: "us", // TODO: 'yes' or 'true', string according to docs
       }))
-    }
+    },
   },
   scraperapi: {
-    name: 'ScraperAPI',
-    link: 'https://www.scraperapi.com/?fp_ref=pavel26',
+    name: "ScraperAPI",
+    link: "https://www.scraperapi.com/?fp_ref=pavel26",
     tokenPlaceholder: genericTokenPlaceholder,
-    desc: '…',
+    desc: "…",
     fn: async (url, token) => {
       // https://www.scraperapi.com/documentation/
-      return fetch('http://api.scraperapi.com?' + new URLSearchParams({
+      return fetch("http://api.scraperapi.com?" + new URLSearchParams({
         api_key: token,
         url,
       }))
-    }
+    },
   },
   zenrows: {
-    name: 'ZenRows',
-    link: 'https://www.zenrows.com/?fpr=pavel34',
+    name: "ZenRows",
+    link: "https://www.zenrows.com/?fpr=pavel34",
     tokenLength: 40,
     tokenRegex: /^[a-z0-9]{40}$/,
-    tokenHint: '40 chars long, lowercase letters and numbers',
-    tokenPlaceholder: '739a...',
-    desc: '…',
+    tokenHint: "40 chars long, lowercase letters and numbers",
+    tokenPlaceholder: "739a...",
+    desc: "…",
     fn: async (url, token) => {
       // https://www.zenrows.com/documentation#overview-node
       // https://app.zenrows.com/builder
-      return fetchNoCors('https://api.zenrows.com/v1/?' + new URLSearchParams({
+      return fetchNoCors("https://api.zenrows.com/v1/?" + new URLSearchParams({
         apikey: token, // beware: all lowercase!
         url,
-        premium_proxy: 'false',
-        antibot: 'false', // TODO: Enable with paid plan tokens
+        premium_proxy: "false",
+        antibot: "false", // TODO: Enable with paid plan tokens
       }))
-
-    }
+    },
   },
 }
 export const tokensInitial: FormTokensValues = Object.entries(services).reduce((acc, [key, value]) => {
-  acc[key] = '';
-  return acc;
-}, {});
+  acc[key] = ""
+  return acc
+}, {})
 export const togglesInitial: FormTogglesValues = Object.entries(services).reduce((acc, [key, value]) => {
-  acc[key] ??= false;
-  return acc;
+  acc[key] ??= false
+  return acc
 }, {
   fetch: true, // Enable 'fetch' service by default for more intuitive UX
-});
+})
 export const configInitial = {
-  url: `https://api.github.com/users/strajk`,
-};
+  url: "https://api.github.com/users/strajk",
+}

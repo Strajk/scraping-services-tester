@@ -1,134 +1,135 @@
-import React, {useMemo, useReducer} from 'react';
-import prettyBytes from 'pretty-bytes';
+import React, { useMemo, useReducer } from "react"
+import prettyBytes from "pretty-bytes"
 import dayjs from "dayjs"
-import './App.css';
-import {Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Group, Loader, Stack, Table, Text, TextInput, Title} from "@mantine/core";
-import {useLocalStorage} from "@mantine/hooks";
-import {showNotification} from '@mantine/notifications';
-import {IconEyeCheck, IconEyeOff, IconRocket} from '@tabler/icons';
+import "./App.css"
+import { Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Group, Loader, Stack, Table, Text, TextInput, Title } from "@mantine/core"
+import { useLocalStorage } from "@mantine/hooks"
+import { showNotification } from "@mantine/notifications"
+import { IconEyeCheck, IconEyeOff, IconRocket } from "@tabler/icons"
 
-import {useForm} from "@mantine/form";
-import {prettyData, statusColor} from "./utils";
-import {TokensImport} from "./components/TokensImport";
-import {openModal} from "@mantine/modals";
-import {ResultDetail} from "./components/ResultDetail";
-import {About, AboutCore} from "./components/About";
-import {configInitial, examples, services, togglesInitial, tokensInitial} from "./constants";
-import {Action, ActionType, FormConfigValues, FormTogglesValues, FormTokensValues, isResultError, isResultWhole, ResultCore, ResultWhole} from "./types";
+import { useForm } from "@mantine/form"
+import { openModal } from "@mantine/modals"
+import { prettyData, statusColor } from "./utils"
+import { TokensImport } from "./components/TokensImport"
+import { ResultDetail } from "./components/ResultDetail"
+import { About, AboutCore } from "./components/About"
+import { configInitial, examples, services, togglesInitial, tokensInitial } from "./constants"
+import { Action, ActionType, FormConfigValues, FormTogglesValues, FormTokensValues, isResultError, isResultWhole, ResultCore, ResultWhole } from "./types"
 
-function App() {
+function App () {
   const [tokensInitialWithLS, setTokensToLS] = useLocalStorage({
-    key: 'tokens', // local storage key
+    key: "tokens", // local storage key
     defaultValue: tokensInitial, // this will effectively merge saved tokens with default tokens
-    getInitialValueInEffect: false // https://github.com/mantinedev/mantine/issues/2266
-  }); //
-  const formTokens = useForm<FormTokensValues>({initialValues: tokensInitialWithLS});
-  const formToggles = useForm<FormTogglesValues>({initialValues: togglesInitial});
-  const formConfig = useForm<FormConfigValues>({initialValues: configInitial})
-  const [ isLoading, setIsLoading ] = React.useState(false);
-  const [ hideTokes, setHideTokens ] = React.useState(false); // TODO: Maybe also separate loadings for each service
+    getInitialValueInEffect: false, // https://github.com/mantinedev/mantine/issues/2266
+  }) //
+  const formTokens = useForm<FormTokensValues>({ initialValues: tokensInitialWithLS })
+  const formToggles = useForm<FormTogglesValues>({ initialValues: togglesInitial })
+  const formConfig = useForm<FormConfigValues>({ initialValues: configInitial })
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [hideTokes, setHideTokens] = React.useState(false) // TODO: Maybe also separate loadings for each service
 
   const selectedServices = useMemo(() => {
     return Object.entries(formToggles.values)
       .filter(([key, value]) => value)
-      .map(([key, value]) => key);
-  }, [formToggles.values]);
+      .map(([key, value]) => key)
+  }, [formToggles.values])
 
   /* RESULTS */
   // TODO: Refactor
-  const [ results, dispatchResults ] = useReducer((state: any, action: Action) => {
+  const [results, dispatchResults] = useReducer((state: any, action: Action) => {
     switch (action.type) {
       case ActionType.Push:
-        return [...state, action.payload];
+        return [...state, action.payload]
       case ActionType.Update:
-        const desiredResult = state.find((result: ResultCore) => result.key === action.payload.key);
-        Object.assign(desiredResult, action.payload); // mutate in place
-        return [...state]; // Without cloning array, React won't re-render // TODO: Solve nicer! For perf is not an issue
+        // eslint-disable-next-line no-case-declarations
+        const desiredResult = state.find((result: ResultCore) => result.key === action.payload.key)
+        Object.assign(desiredResult, action.payload) // mutate in place
+        return [...state] // Without cloning array, React won't re-render // TODO: Solve nicer! For perf is not an issue
       case ActionType.Clear:
         if (action.payload) {
           // TODO: Investigate why `payload!` is needed, even though it's checked above
-          return state.filter((item: ResultCore) => item.service !== action.payload!.service);
+          return state.filter((item: ResultCore) => item.service !== action.payload!.service)
         }
-        return [];
+        return []
     }
   }, [])
 
   // derived structure for easier rendering
   const resultsByService: { [key: string]: ResultCore[] } = useMemo(() => {
     return results.reduce((acc, result) => {
-      acc[result.service] ??= [];
-      acc[result.service].push(result);
-      return acc;
-    }, {});
-  }, [results]);
+      acc[result.service] ??= []
+      acc[result.service].push(result)
+      return acc
+    }, {})
+  }, [results])
 
   const tokensImportPrompt = () =>
     openModal({
-      title: 'Import tokens',
-      size: 'xl',
+      title: "Import tokens",
+      size: "xl",
       children: <TokensImport
         passValues={(values) => formTokens.setValues(values)}
-      />
+      />,
     })
 
   const handleSubmit = async () => {
-    const {values: valuesTokens} = formTokens;
-    const {values: valuesToggles} = formToggles; // eslint-disable-line @typescript-eslint/no-unused-vars
-    const {values: valuesConfig} = formConfig;
-    setTokensToLS(valuesTokens); // save services to local storage, not config
+    const { values: valuesTokens } = formTokens
+    const { values: valuesToggles } = formToggles // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
+    const { values: valuesConfig } = formConfig
+    setTokensToLS(valuesTokens) // save services to local storage, not config
 
     if (!selectedServices.length) {
       showNotification({
-        title: 'No services selected',
-        message: 'Please select at least one service',
-        color: 'red',
+        title: "No services selected",
+        message: "Please select at least one service",
+        color: "red",
       })
-      return;
+      return
     }
 
-    setIsLoading(true);
+    setIsLoading(true)
     Promise.allSettled(selectedServices.map(async (service) => {
-      const serviceDef = services[service];
-      const token = valuesTokens[service];
+      const serviceDef = services[service]
+      const token = valuesTokens[service]
 
       // Handle invalid input
-      if (!token && service !== 'fetch') {
+      if (!token && service !== "fetch") {
         showNotification({
           title: `No token for ${serviceDef.name}`,
-          message: 'Please provide a token',
-          color: 'red',
+          message: "Please provide a token",
+          color: "red",
         })
-        return;
+        return
       }
 
-      const timeStart = Date.now(); // number of milliseconds elapsed since epoch, should be unique
-      const timestamp = new Date(timeStart).toISOString();
-      const key = `${service}-${timeStart}`;
+      const timeStart = Date.now() // number of milliseconds elapsed since epoch, should be unique
+      const timestamp = new Date(timeStart).toISOString()
+      const key = `${service}-${timeStart}`
       const partialResult = { key, service, timestamp }
       dispatchResults({
         type: ActionType.Push,
-        payload: partialResult
+        payload: partialResult,
       })
 
       // Main logic!
       const res = await serviceDef.fn(valuesConfig.url, token)
         .catch((err) => {
-          console.error(`💣 Error while fetching ${serviceDef.name}`, err);
+          console.error(`💣 Error while fetching ${serviceDef.name}`, err)
           dispatchResults({
             type: ActionType.Update,
             payload: {
               ...partialResult,
               duration: Date.now() - timeStart,
               error: err.message,
-            }
+            },
           })
-        });
+        })
 
       // get around `body stream already read` error
       // https://github.com/whatwg/fetch/issues/196#issuecomment-377918371
-      const blob = await (res.clone()).blob();
-      const data = await (res.clone()).json();
-      const text = await (res.clone()).text();
+      const blob = await (res.clone()).blob()
+      const data = await (res.clone()).json()
+      const text = await (res.clone()).text()
 
       dispatchResults({
         type: ActionType.Update,
@@ -137,28 +138,28 @@ function App() {
           duration: Date.now() - timeStart,
           status: res.status, // 200
           statusText: res.statusText, // OK
-          contentLength: res.headers.get('content-length')
-            ? Number(res.headers.get('content-length'))
+          contentLength: res.headers.get("content-length")
+            ? Number(res.headers.get("content-length"))
             : blob.size,
           headers: Object.fromEntries(res.headers.entries()),
           text,
-          data
-        }
-      });
+          data,
+        },
+      })
     })).finally(() => {
-      setIsLoading(false);
+      setIsLoading(false)
     })
   }
 
   const handleReset = () => {
-    window.location.reload();
+    window.location.reload()
   }
 
   const openAbout = () => {
     openModal({
-      title: 'About this project',
-      size: 'xl',
-      children: <About />
+      title: "About this project",
+      size: "xl",
+      children: <About />,
     })
   }
 
@@ -166,7 +167,7 @@ function App() {
     <tr key={serviceId}>
       <td>
         <Checkbox
-          style={{display: 'flex'}} /* to fix vertical align */
+          style={{ display: "flex" }} /* to fix vertical align */
           {...formToggles.getInputProps(serviceId)}
           checked={formToggles.values[serviceId]} /* this seems unintuitive but is needed for checkbox to work */
         />
@@ -183,67 +184,67 @@ function App() {
         }
       </td>
       <td>
-        {serviceId === 'fetch' ? <TextInput
+        {serviceId === "fetch" ? <TextInput
           size="xs"
           value="Token not applicable, it's just native browse's fetch API"
           disabled
         /> : <TextInput
           size="xs"
-          type={hideTokes ? 'password' : 'text'}
+          type={hideTokes ? "password" : "text"}
           placeholder={serviceVal.tokenPlaceholder}
           {...formTokens.getInputProps(serviceId)}
         />}
       </td>
     </tr>
-  ));
+  ))
 
-  function clear(serviceId?: string) {
+  function clear (serviceId?: string) {
     dispatchResults({
       type: ActionType.Clear,
-      payload: serviceId ? {service: serviceId} : undefined,
+      payload: serviceId ? { service: serviceId } : undefined,
     })
   }
 
   return (
     <Container className="App">
 
-        {/* TODO: Polish */}
-        <Title order={1} mt={8}>Scraping services tester</Title>
-        <Text color="dimmed" size="sm">Test various scraping/proxy services against specified URL</Text>
+      {/* TODO: Polish */}
+      <Title order={1} mt={8}>Scraping services tester</Title>
+      <Text color="dimmed" size="sm">Test various scraping/proxy services against specified URL</Text>
 
-        <Accordion variant="contained" defaultValue="about" mt={8}>
-          <Accordion.Item value="about">
-            <Accordion.Control
-              style={{
-                // tighten up
-                paddingTop: 16 - 4,
-                paddingBottom: 16 - 4,
-                fontSize: 14,
-              }}
-            >
-              <b>🥷 Why it's ok to input your precious tokens</b>
-              {" "}
-              <a href="#" onClick={(ev) => {
-                openAbout();
-                ev.stopPropagation(); // prevent accordion from toggling
-              }}>Read more</a>
-            </Accordion.Control>
-            <Accordion.Panel><AboutCore /></Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
+      <Accordion variant="contained" defaultValue="about" mt={8}>
+        <Accordion.Item value="about">
+          <Accordion.Control
+            style={{
+              // tighten up
+              paddingTop: 16 - 4,
+              paddingBottom: 16 - 4,
+              fontSize: 14,
+            }}
+          >
+            <b>🥷 Why it's ok to input your precious tokens</b>
+            {" "}
+            <a href="#" onClick={(ev) => {
+              openAbout()
+              ev.stopPropagation() // prevent accordion from toggling
+            }}>Read more</a>
+          </Accordion.Control>
+          <Accordion.Panel><AboutCore /></Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
 
-        {/* Input */}
-        <Stack
-          spacing="xs"
-          mt={12}
-        >
+      {/* Input */}
+      <Stack
+        spacing="xs"
+        mt={12}
+      >
 
-          {/* Services */}
-          <Table horizontalSpacing="xs">
-            <thead>
+        {/* Services */}
+        <Table horizontalSpacing="xs">
+          <thead>
             <tr>
-              <th style={{width: 1}}></th>
-              <th style={{width: 1}}>Service</th>
+              <th style={{ width: 1 }}></th>
+              <th style={{ width: 1 }}>Service</th>
               <th>
                 <Group position="apart">
                   <span>
@@ -255,7 +256,7 @@ function App() {
                     <ActionIcon
                       size={20}
                       display="inline-flex"
-                      style={{verticalAlign: 'text-bottom'}}
+                      style={{ verticalAlign: "text-bottom" }}
                       onClick={() => setHideTokens(!hideTokes)}
                     >
                       {hideTokes ? <IconEyeOff size={20} /> : <IconEyeCheck size={20} />}
@@ -264,106 +265,96 @@ function App() {
                 </Group>
               </th>
             </tr>
-            </thead>
-            <tbody>{rows}</tbody>
-          </Table>
+          </thead>
+          <tbody>{rows}</tbody>
+        </Table>
 
-          {/* Config */}
-          <TextInput
-            name="url"
-            {...formConfig.getInputProps('url')}
-            styles={(theme) => ({
-              "input" : {
-                border: '2px solid #228be6'
-              }
-            })}
-          />
-          <Text lineClamp={2} size={"xs"} mt={-4}>
-            <b>Try: </b>
-            {examples.map(([title, url], i) => (
-              <>
-                <a
-                  href="#"
-                  style={{textDecoration: 'none'}}
-                  onClick={() => formConfig.setValues({url})}
-                >
-                  {title}
-                </a>
-                {i !== examples.length - 1 ? ' • ' : ''}
-              </>
-            ))}
-          </Text>
-
-
-          {/* Actions */}
-          <Group position="apart" spacing="xs" grow>
-            <Button
-              variant="subtle"
-              color="red"
-              onClick={handleReset}
-            >
-              Reset
-            </Button>
-
-            {/* TODO: Config */}
-            {/*<Button
-              variant="outline"
-              color="dark"
-              onClick={handleConfig}
-            >
-              Config
-            </Button>*/}
-
-            <Button
-              variant="filled"
-              color="dark"
-              onClick={handleSubmit}
-              loading={isLoading}
-              rightIcon={<IconRocket size={20} />}
-            >
-              Send requests
-            </Button>
-          </Group>
-        </Stack>
-
-        <Divider
-          mt="xl"
-          mb="xs"
-          label="Responses"
-          labelPosition="center"
+        {/* Config */}
+        <TextInput
+          name="url"
+          {...formConfig.getInputProps("url")}
+          styles={(theme) => ({
+            input: {
+              border: "2px solid #228be6",
+            },
+          })}
         />
-
-        {/* Results */}
-        {selectedServices.map((serviceId) => {
-          const serviceDef = services[serviceId];
-          const results = resultsByService[serviceId] ?? [];
-          return (
-            <Card
-              shadow="sm"
-              p="xs"
-              mt="sm"
-              withBorder
-              key={serviceId}
-            >
-              <Group position="apart">
-                <Text weight={500}>{serviceDef.name}</Text>
-                <Button
-                  variant="subtle"
-                  size="xs"
-                  color="gray"
-                  onClick={() => clear(serviceId)}
-                >Clear</Button>
-              </Group>
-
-              <Table
-                striped highlightOnHover withBorder
-                mt="xs"
-                style={{whiteSpace: 'nowrap'}}
+        <Text lineClamp={2} size={"xs"} mt={-4}>
+          <b>Try: </b>
+          {examples.map(([title, url], i) => (
+            <>
+              <a
+                href="#"
+                style={{ textDecoration: "none" }}
+                onClick={() => formConfig.setValues({ url })}
               >
-                <tbody>
+                {title}
+              </a>
+              {i !== examples.length - 1 ? " • " : ""}
+            </>
+          ))}
+        </Text>
+
+        {/* Actions */}
+        <Group position="apart" spacing="xs" grow>
+          <Button
+            variant="subtle"
+            color="red"
+            onClick={handleReset}
+          >
+              Reset
+          </Button>
+
+          <Button
+            variant="filled"
+            color="dark"
+            onClick={handleSubmit}
+            loading={isLoading}
+            rightIcon={<IconRocket size={20} />}
+          >
+              Send requests
+          </Button>
+        </Group>
+      </Stack>
+
+      <Divider
+        mt="xl"
+        mb="xs"
+        label="Responses"
+        labelPosition="center"
+      />
+
+      {/* Results */}
+      {selectedServices.map((serviceId) => {
+        const serviceDef = services[serviceId]
+        const results = resultsByService[serviceId] ?? []
+        return (
+          <Card
+            shadow="sm"
+            p="xs"
+            mt="sm"
+            withBorder
+            key={serviceId}
+          >
+            <Group position="apart">
+              <Text weight={500}>{serviceDef.name}</Text>
+              <Button
+                variant="subtle"
+                size="xs"
+                color="gray"
+                onClick={() => clear(serviceId)}
+              >Clear</Button>
+            </Group>
+
+            <Table
+              striped highlightOnHover withBorder
+              mt="xs"
+              style={{ whiteSpace: "nowrap" }}
+            >
+              <tbody>
                 {results?.length
                   ? results.map((result: ResultCore | ResultWhole) => {
-                    const timestampFormatted = dayjs(result.timestamp).format('YYYY-MM-DD HH:mm:ss');
+                    const timestampFormatted = dayjs(result.timestamp).format("YYYY-MM-DD HH:mm:ss")
 
                     // TODO: Smarter type guards
                     if (!isResultWhole(result)) {
@@ -371,11 +362,11 @@ function App() {
                         key={`${result.service}-${result.timestamp}`}
                         // no onClick nor style until it is full result
                       >
-                        <td style={{width: 1}}>
+                        <td style={{ width: 1 }}>
                           {timestampFormatted}
                         </td>
                         <td colSpan={99}>
-                          <Loader size="sm" variant="dots" style={{verticalAlign: 'middle'}}/>
+                          <Loader size="sm" variant="dots" style={{ verticalAlign: "middle" }}/>
                         </td>
                       </tr>
                     }
@@ -385,12 +376,12 @@ function App() {
                         key={`${result.service}-${result.timestamp}`}
                         // no onClick nor style until it is full result
                       >
-                        <td style={{width: 1}}>
+                        <td style={{ width: 1 }}>
                           {timestampFormatted}
                         </td>
-                        <td style={{width: 1}}>
+                        <td style={{ width: 1 }}>
                           <Badge
-                            color={'red'}
+                            color={"red"}
                             size="sm"
                             title={result.error}
                           >
@@ -405,19 +396,19 @@ function App() {
                     return (
                       <tr
                         key={`${result.service}-${result.timestamp}`}
-                        style={{cursor: 'pointer'}}
+                        style={{ cursor: "pointer" }}
                         onClick={() => {
                           openModal({
                             title: `${serviceDef.name} at ${timestampFormatted}`,
                             children: <ResultDetail result={result} />,
-                            size: 'xl',
+                            size: "xl",
                           })
                         }}
                       >
-                        <td style={{width: 1}}>
+                        <td style={{ width: 1 }}>
                           {timestampFormatted}
                         </td>
-                        <td style={{width: 1}}>
+                        <td style={{ width: 1 }}>
                           <Badge
                             color={statusColor(result.status)}
                             size="sm"
@@ -426,30 +417,30 @@ function App() {
                             {result.status}
                           </Badge>
                         </td>
-                        <td style={{width: 120}}>
+                        <td style={{ width: 120 }}>
                           {result.duration} ms
                         </td>
-                        <td style={{width: 120}}>
-                          {result.contentLength ? prettyBytes(result.contentLength) : '-'}
+                        <td style={{ width: 120 }}>
+                          {result.contentLength ? prettyBytes(result.contentLength) : "-"}
                         </td>
                         <td>{prettyData(result.data)}</td>
                         <td>{Object.keys(result.headers).length} headers</td>
                       </tr>
-                    );
+                    )
                   })
                   : <tr>
                     <td colSpan={99}>No results yet</td>
                   </tr>}
-                </tbody>
-              </Table>
-            </Card>
-          );
-        })}
+              </tbody>
+            </Table>
+          </Card>
+        )
+      })}
 
-        {/* Uncomment for easier development */}
-        {/* <About /> */}
+      {/* Uncomment for easier development */}
+      {/* <About /> */}
     </Container>
-  );
+  )
 }
 
-export default App;
+export default App
