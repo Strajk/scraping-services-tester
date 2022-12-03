@@ -2,10 +2,10 @@ import React, { useMemo, useReducer } from "react"
 import prettyBytes from "pretty-bytes"
 import dayjs from "dayjs"
 import "./App.css"
-import { Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Group, Loader, Stack, Table, Text, TextInput, Title } from "@mantine/core"
+import { Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Flex, Group, Loader, Stack, Table, Text, TextInput, Title } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
 import { showNotification } from "@mantine/notifications"
-import { IconEyeCheck, IconEyeOff, IconRocket } from "@tabler/icons"
+import { IconExternalLink, IconEyeCheck, IconEyeOff, IconRocket } from "@tabler/icons"
 
 import { useForm } from "@mantine/form"
 import { openModal } from "@mantine/modals"
@@ -21,7 +21,7 @@ function App () {
     key: "tokens", // local storage key
     defaultValue: tokensInitial, // this will effectively merge saved tokens with default tokens
     getInitialValueInEffect: false, // https://github.com/mantinedev/mantine/issues/2266
-  }) //
+  })
   const formTokens = useForm<FormTokensValues>({ initialValues: tokensInitialWithLS })
   const formToggles = useForm<FormTogglesValues>({ initialValues: togglesInitial })
   const formConfig = useForm<FormConfigValues>({ initialValues: configInitial })
@@ -184,16 +184,29 @@ function App () {
         }
       </td>
       <td>
-        {serviceId === "fetch" ? <TextInput
-          size="xs"
-          value="Token not applicable, it's just native browse's fetch API"
-          disabled
-        /> : <TextInput
-          size="xs"
-          type={hideTokes ? "password" : "text"}
-          placeholder={serviceVal.tokenPlaceholder}
-          {...formTokens.getInputProps(serviceId)}
-        />}
+        <Flex>
+          {serviceId === "fetch" ? <TextInput
+            size="xs"
+            style={{ flexGrow: 1 }}
+            value="Token not applicable, it's just native browse's fetch API"
+            disabled
+          /> : <TextInput
+            size="xs"
+            style={{ flexGrow: 1 }}
+            type={hideTokes ? "password" : "text"}
+            placeholder={serviceVal.tokenPlaceholder}
+            {...formTokens.getInputProps(serviceId)}
+          />}
+          <ActionIcon
+            component="a"
+            title="Open service dashboard"
+            href={serviceVal.dashboardLink}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <IconExternalLink size={18} />
+          </ActionIcon>
+        </Flex>
       </td>
     </tr>
   ))

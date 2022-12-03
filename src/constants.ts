@@ -23,6 +23,7 @@ export const services: Services = {
   apify: {
     name: "Apify",
     link: "https://www.apify.com?fpr=1kxqp",
+    dashboardLink: "https://console.apify.com/proxy#/usage",
     tokenLength: 25,
     tokenRegex: /^[a-zA-Z]{25}$/,
     tokenHint: "25 chars long, lowercase and uppercase letters",
@@ -41,6 +42,7 @@ export const services: Services = {
   scrapingbee: {
     name: "ScrapingBee",
     link: "https://www.scrapingbee.com/", // TODO: Add affiliate, already registered
+    dashboardLink: "https://app.scrapingbee.com/dashboard",
     desc: "…",
     tokenLength: 80,
     tokenRegex: /^[A-Z0-9]{80}$/,
@@ -60,6 +62,7 @@ export const services: Services = {
   scrapingdog: {
     name: "ScrapingDog",
     link: "https://www.scrapingdog.com/?deal=pavel81",
+    dashboardLink: "https://api.scrapingdog.com/dashboard",
     tokenLength: 25,
     tokenRegex: /^[a-z0-9]{25}$/,
     tokenHint: "25 chars long, lowercase letters and numbers",
@@ -78,6 +81,7 @@ export const services: Services = {
   scrapingowl: {
     name: "ScrapingOwl",
     link: "https://scrapeowl.com/", // No affiliate
+    dashboardLink: "https://app.scrapeowl.com",
     tokenLength: 30,
     tokenRegex: /^[a-z0-9]{30}$/,
     tokenHint: "30 chars long, lowercase letters and numbers",
@@ -114,6 +118,7 @@ export const services: Services = {
   scraperapi: {
     name: "ScraperAPI",
     link: "https://www.scraperapi.com/?fp_ref=pavel26",
+    dashboardLink: "https://app.scraperapi.com",
     tokenPlaceholder: genericTokenPlaceholder,
     desc: "…",
     fn: async (url, token) => {
@@ -127,6 +132,7 @@ export const services: Services = {
   zenrows: {
     name: "ZenRows",
     link: "https://www.zenrows.com/?fpr=pavel34",
+    dashboardLink: "https://app.zenrows.com/analytics",
     tokenLength: 40,
     tokenRegex: /^[a-z0-9]{40}$/,
     tokenHint: "40 chars long, lowercase letters and numbers",

@@ -2,6 +2,7 @@
 export interface Service {
   name: string
   link?: string
+  dashboardLink?: string
   desc: string
   fn: any,
   tokenLength?: number
