@@ -343,7 +343,10 @@ function App () {
               <a
                 href="#"
                 style={{ textDecoration: "none" }}
-                onClick={() => formConfig.setValues({ url })}
+                onClick={(ev) => {
+                  formConfig.setValues({ url })
+                  ev.preventDefault() // prevent page to scroll to top
+                }}
               >
                 {title}
               </a>
