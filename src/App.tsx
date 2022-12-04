@@ -1,4 +1,4 @@
-import React, { useMemo, useReducer } from "react"
+import React, { Fragment, useMemo, useReducer } from "react"
 import prettyBytes from "pretty-bytes"
 import dayjs from "dayjs"
 import "./App.css"
@@ -312,7 +312,7 @@ function App () {
         <Text lineClamp={2} size={"xs"} mt={-4}>
           <b>Try: </b>
           {examples.map(([title, url], i) => (
-            <>
+            <Fragment key={title}>
               <a
                 href="#"
                 style={{ textDecoration: "none" }}
@@ -321,7 +321,7 @@ function App () {
                 {title}
               </a>
               {i !== examples.length - 1 ? " • " : ""}
-            </>
+            </Fragment>
           ))}
         </Text>
 

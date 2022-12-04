@@ -40,6 +40,7 @@ export function ServiceSettings ({
             case "boolean":
               return (
                 <Checkbox
+                  key={key}
                   /* @ts-ignore YOLO */
                   {...settingsForm.getInputProps(`${id}.${key}`)}
                   {...sharedProps}
