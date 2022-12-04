@@ -2,7 +2,7 @@
 
 > Test various scraping/proxy services against specified URL
 
-<video src="./.assets/demo.mp4" width="100%" height="auto" controls preload></video>
+https://user-images.githubusercontent.com/697301/205490009-3c2f20d2-0027-4b9b-99db-7a3e7c5a8052.mp4
 
 ### Development
 
