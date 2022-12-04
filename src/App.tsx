@@ -367,7 +367,7 @@ function App () {
             key={serviceId}
           >
             <Group position="apart">
-              <Text weight={500}>{serviceDef.name}</Text>
+              <Text weight={700}>{serviceDef.name}</Text>
               <Button
                 variant="subtle"
                 size="xs"
