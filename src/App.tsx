@@ -28,7 +28,7 @@ function App () {
   const formConfig = useForm<FormConfigValues>({ initialValues: configInitial })
   const formSettings = useForm({ initialValues: settingsInitial }) // TODO: Local storage
   const [isLoading, setIsLoading] = React.useState(false)
-  const [hideTokes, setHideTokens] = React.useState(false) // TODO: Maybe also separate loadings for each service
+  const [hideTokes, setHideTokens] = React.useState(true) // TODO: Maybe also separate loadings for each service
 
   const selectedServices = useMemo(() => {
     return Object.entries(formToggles.values)
