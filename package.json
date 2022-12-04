@@ -1,5 +1,6 @@
 {
   "name": "scraping-services-tester",
+  "description": "Test various scraping/proxy services against specified URL",
   "version": "0.1.0",
   "private": true,
   "homepage": "https://strajk.github.io/scraping-services-tester",

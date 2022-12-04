@@ -1,6 +1,8 @@
 # Scraping services tester
 
-Description TBD
+> Test various scraping/proxy services against specified URL
+
+<video src="./.assets/demo.mp4" width="100%" height="auto" controls preload></video>
 
 ### Development
 
