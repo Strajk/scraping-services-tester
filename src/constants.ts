@@ -13,7 +13,6 @@ export const examples = [
 export const services: Services = {
   fetch: {
     name: "Native Fetch",
-    desc: "…",
     fn: (url) => {
       return fetch(url)
       // uncomment the following line to slow down the response for testing
@@ -22,13 +21,24 @@ export const services: Services = {
   },
   apify: {
     name: "Apify",
+    note: `
+Apify Proxy currently does not have the "API mode", it's only available as the standard proxy.
+But that means it's only usable in Node.js, not in the browser.
+
+To accommodate for that, I've deployed simple Node.js server that uses Apify Proxy and exposes it as a API endpoint accessible from the browser.
+
+But, since this is a pet project, it's only deployed on free tier of Fly.io, so:
+- it's slow – that does not mean the Apify Proxy is slow, only my server
+- it might be down – it only runs until it runs out of free credits
+
+Read more about it at <a href="https://github.com/Strajk/scraping-services-tester/tree/master/apify-proxy-aas" target="_blank">GitHub</a>
+    `.trim().replace(/\n/g, "<br />"),
     link: "https://www.apify.com?fpr=1kxqp",
     dashboardLink: "https://console.apify.com/proxy#/usage",
     tokenLength: 25,
     tokenRegex: /^[a-zA-Z]{25}$/,
     tokenHint: "25 chars long, lowercase and uppercase letters",
     tokenPlaceholder: "bkNb...",
-    desc: "…",
     settings: {
       groups: {
         type: "text",
@@ -51,7 +61,6 @@ export const services: Services = {
     name: "ScrapingBee",
     link: "https://www.scrapingbee.com/", // TODO: Add affiliate, already registered
     dashboardLink: "https://app.scrapingbee.com/dashboard",
-    desc: "…",
     tokenLength: 80,
     tokenRegex: /^[A-Z0-9]{80}$/,
     tokenHint: "80 chars long, uppercase letters and numbers",
@@ -91,7 +100,6 @@ export const services: Services = {
     tokenRegex: /^[a-z0-9]{25}$/,
     tokenHint: "25 chars long, lowercase letters and numbers",
     tokenPlaceholder: "s6386...",
-    desc: "…",
     settings: {
       premium: {
         type: "boolean",
@@ -125,7 +133,6 @@ export const services: Services = {
     tokenRegex: /^[a-z0-9]{30}$/,
     tokenHint: "30 chars long, lowercase letters and numbers",
     tokenPlaceholder: "386a...",
-    desc: "…",
     settings: {
       premium_proxies: {
         type: "boolean",
@@ -155,7 +162,6 @@ export const services: Services = {
     link: "https://www.scraperapi.com/?fp_ref=pavel26",
     dashboardLink: "https://app.scraperapi.com",
     tokenPlaceholder: genericTokenPlaceholder,
-    desc: "…",
     settings: {
       premium: {
         type: "boolean",
@@ -194,7 +200,6 @@ export const services: Services = {
     tokenRegex: /^[a-z0-9]{40}$/,
     tokenHint: "40 chars long, lowercase letters and numbers",
     tokenPlaceholder: "739a...",
-    desc: "…",
     settings: {
       premium_proxy: {
         type: "boolean",
@@ -209,6 +214,11 @@ export const services: Services = {
         default: false,
       },
     },
+    note: `
+ZenRows API does not allow calling it from the browser due to CORS policy.
+
+To accommodate this, we "fetch-no-cors" npm package, which works by proxying the request through https://cors-anywhere.herokuapp.com/corsdemo
+    `.trim().replace(/\n/g, "<br />"),
     fn: async (url, token, settings) => {
       // https://www.zenrows.com/documentation#overview-node
       // https://app.zenrows.com/builder

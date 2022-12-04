@@ -3,7 +3,7 @@ export interface Service {
   name: string
   link?: string
   dashboardLink?: string
-  desc: string
+  note?: string
   settings?: object // optional, but majority of services should have it
   fn: any,
   tokenLength?: number

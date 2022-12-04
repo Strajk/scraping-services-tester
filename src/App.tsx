@@ -2,10 +2,10 @@ import React, { Fragment, useMemo, useReducer } from "react"
 import prettyBytes from "pretty-bytes"
 import dayjs from "dayjs"
 import "./App.css"
-import { Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Flex, Group, Loader, Stack, Table, Text, TextInput, Title } from "@mantine/core"
+import { Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Flex, Group, Loader, Popover, Stack, Table, Text, TextInput, Title } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
 import { showNotification } from "@mantine/notifications"
-import { IconExternalLink, IconEyeCheck, IconEyeOff, IconRocket } from "@tabler/icons"
+import { IconExternalLink, IconEyeCheck, IconEyeOff, IconInfoCircle, IconRocket } from "@tabler/icons"
 
 import { useForm } from "@mantine/form"
 import { openModal } from "@mantine/modals"
@@ -177,15 +177,30 @@ function App () {
         />
       </td>
       <td>
-        {serviceVal.link
-          ? <a
-            href={serviceVal.link}
-            target="_blank"
-            rel="noreferrer"
-            title={`Affiliate link to ${serviceVal.name}`}
-          >{serviceVal.name}</a>
-          : serviceVal.name
-        }
+        <Flex align="center">
+          {serviceVal.link
+            ? <a
+              href={serviceVal.link}
+              target="_blank"
+              rel="noreferrer"
+              title={`Affiliate link to ${serviceVal.name}`}
+            >{serviceVal.name}</a>
+            : serviceVal.name
+          }
+          {serviceVal.note && (
+            <Popover width="xl" position="bottom" withArrow shadow="md">
+              <Popover.Target>
+                <ActionIcon>
+                  <IconInfoCircle size={20} />
+                </ActionIcon>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <span dangerouslySetInnerHTML={{ __html: serviceVal.note }} />
+              </Popover.Dropdown>
+            </Popover>
+
+          )}
+        </Flex>
       </td>
       <td>
         <Stack spacing={4}>
