@@ -13,8 +13,9 @@ import { prettyData, statusColor } from "./utils"
 import { TokensImport } from "./components/TokensImport"
 import { ResultDetail } from "./components/ResultDetail"
 import { About, AboutCore } from "./components/About"
-import { configInitial, examples, services, togglesInitial, tokensInitial } from "./constants"
+import { configInitial, examples, services, settingsInitial, togglesInitial, tokensInitial } from "./constants"
 import { Action, ActionType, FormConfigValues, FormTogglesValues, FormTokensValues, isResultError, isResultWhole, ResultCore, ResultWhole } from "./types"
+import { ServiceSettings } from "./components/ServiceSettings"
 
 function App () {
   const [tokensInitialWithLS, setTokensToLS] = useLocalStorage({
@@ -25,6 +26,7 @@ function App () {
   const formTokens = useForm<FormTokensValues>({ initialValues: tokensInitialWithLS })
   const formToggles = useForm<FormTogglesValues>({ initialValues: togglesInitial })
   const formConfig = useForm<FormConfigValues>({ initialValues: configInitial })
+  const formSettings = useForm({ initialValues: settingsInitial }) // TODO: Local storage
   const [isLoading, setIsLoading] = React.useState(false)
   const [hideTokes, setHideTokens] = React.useState(false) // TODO: Maybe also separate loadings for each service
 
@@ -76,6 +78,7 @@ function App () {
     const { values: valuesTokens } = formTokens
     const { values: valuesToggles } = formToggles // eslint-disable-line @typescript-eslint/no-unused-vars, no-unused-vars
     const { values: valuesConfig } = formConfig
+    const { values: valuesSettings } = formSettings
     setTokensToLS(valuesTokens) // save services to local storage, not config
 
     if (!selectedServices.length) {
@@ -112,7 +115,8 @@ function App () {
       })
 
       // Main logic!
-      const res = await serviceDef.fn(valuesConfig.url, token)
+      const settings = valuesSettings[service] ?? {}
+      const res = await serviceDef.fn(valuesConfig.url, token, settings)
         .catch((err) => {
           console.error(`💣 Error while fetching ${serviceDef.name}`, err)
           dispatchResults({
@@ -184,29 +188,42 @@ function App () {
         }
       </td>
       <td>
-        <Flex>
-          {serviceId === "fetch" ? <TextInput
-            size="xs"
-            style={{ flexGrow: 1 }}
-            value="Token not applicable, it's just native browse's fetch API"
-            disabled
-          /> : <TextInput
-            size="xs"
-            style={{ flexGrow: 1 }}
-            type={hideTokes ? "password" : "text"}
-            placeholder={serviceVal.tokenPlaceholder}
-            {...formTokens.getInputProps(serviceId)}
-          />}
-          <ActionIcon
-            component="a"
-            title="Open service dashboard"
-            href={serviceVal.dashboardLink}
-            target="_blank"
-            rel="noreferrer"
+        <Stack spacing={4}>
+          {/* Credentials */}
+          <Flex>
+            {serviceId === "fetch" ? <TextInput
+              size="xs"
+              style={{ flexGrow: 1 }}
+              value="Token not applicable, it's just native browse's fetch API"
+              disabled
+            /> : <TextInput
+              size="xs"
+              style={{ flexGrow: 1 }}
+              type={hideTokes ? "password" : "text"}
+              placeholder={serviceVal.tokenPlaceholder}
+              {...formTokens.getInputProps(serviceId)}
+            />}
+            <ActionIcon
+              component="a"
+              title="Open service dashboard"
+              href={serviceVal.dashboardLink}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <IconExternalLink size={18} />
+            </ActionIcon>
+          </Flex>
+          {/* Settings */}
+          <Flex
+            style={{ opacity: 0.8 }} /* Poor man's visual hierarchy */
           >
-            <IconExternalLink size={18} />
-          </ActionIcon>
-        </Flex>
+            <ServiceSettings
+              id={serviceId}
+              settingsDef={serviceVal.settings}
+              settingsForm={formSettings}
+            />
+          </Flex>
+        </Stack>
       </td>
     </tr>
   ))
@@ -261,7 +278,7 @@ function App () {
               <th>
                 <Group position="apart">
                   <span>
-                    Credentials
+                    Credentials & settings
                     {" "}
                     <a href="#" onClick={tokensImportPrompt}>Import</a>
                   </span>
@@ -315,7 +332,7 @@ function App () {
             color="red"
             onClick={handleReset}
           >
-              Reset
+              Reset & clear all
           </Button>
 
           <Button

@@ -4,6 +4,7 @@ export interface Service {
   link?: string
   dashboardLink?: string
   desc: string
+  settings?: object // optional, but majority of services should have it
   fn: any,
   tokenLength?: number
   tokenRegex?: RegExp
@@ -13,6 +14,18 @@ export interface Service {
 
 export interface Services {
   [key: string]: Service
+}
+
+export interface Setting {
+  type: "boolean" | "text" | "select" // TODO: maybe number?
+  label: string
+  note?: string
+  default: any
+  options?: string[]
+}
+
+export interface Settings {
+  [key: string]: Setting
 }
 
 export type ResultCore = {
@@ -66,4 +79,8 @@ export type FormTogglesValues = {
 
 export type FormConfigValues = {
   url: string;
+}
+
+export type FormSettingsValues = {
+  [key: string]: boolean; // TODO: keyof services
 }

@@ -1,5 +1,5 @@
 import fetchNoCors from "fetch-no-cors"
-import { FormTogglesValues, FormTokensValues, Services } from "./types"
+import { FormSettingsValues, FormTogglesValues, FormTokensValues, Services } from "./types"
 
 const genericTokenPlaceholder = "abc123..."
 
@@ -29,6 +29,14 @@ export const services: Services = {
     tokenHint: "25 chars long, lowercase and uppercase letters",
     tokenPlaceholder: "bkNb...",
     desc: "…",
+    settings: {
+      groups: {
+        type: "text",
+        label: "Groups",
+        note: "Comma-separated list of groups to use, check the Apify's dashboard for the list of available groups.",
+        default: "RESIDENTIAL",
+      },
+    },
     fn: async (url, token) => {
       const endpoint = "https://apify-proxy-aas.fly.dev"
       // const endpoint = `http://localhost:8080` // uncomment for local testing
@@ -48,15 +56,31 @@ export const services: Services = {
     tokenRegex: /^[A-Z0-9]{80}$/,
     tokenHint: "80 chars long, uppercase letters and numbers",
     tokenPlaceholder: "IG6CGY...",
-    fn: async (url, token) => {
+    settings: {
+      premium_proxy: {
+        type: "boolean",
+        label: "Premium Proxy",
+        note: "Premium proxy costs more credits",
+        default: false,
+      },
+      country_code: {
+        type: "select",
+        label: "Country",
+        note: "Requires premium proxy",
+        default: "us",
+        options: ["us", "fr", "de", "dk", "gr", "il", "it", "mx", "nl", "no", "ru", "es", "se", "gb"],
+      },
+    },
+    fn: async (url, token, settings) => {
       // https://www.scrapingbee.com/documentation/
-      return fetch("https://app.scrapingbee.com/api/v1?" + new URLSearchParams({
+      const endpoint = "https://app.scrapingbee.com/api/v1?" + new URLSearchParams({
         api_key: token,
         url,
-        // premium_proxy: 'true',
-        // stealth_proxy: 'true',
-        // country_code: 'us',
-      }))
+        ...settings,
+        // stealth_proxy: 'true', // Works only with JS rendering, skip for now
+      })
+      console.log("🚀", endpoint)
+      return fetch(endpoint)
     },
   },
   scrapingdog: {
@@ -68,13 +92,28 @@ export const services: Services = {
     tokenHint: "25 chars long, lowercase letters and numbers",
     tokenPlaceholder: "s6386...",
     desc: "…",
-    fn: async (url, token) => {
+    settings: {
+      premium: {
+        type: "boolean",
+        label: "Premium proxy",
+        note: "Premium proxy costs more credits",
+        default: false, // TODO: 'yes' or 'true', string according to docs
+      },
+      country: {
+        type: "select",
+        label: "Country",
+        note: "Requires premium proxy",
+        default: "random",
+        options: ["random", "au", "ca", "cn", "fr", "de", "in", "it", "mx", "ru", "us", "gb"],
+      },
+    },
+    fn: async (url, token, settings) => {
       // https://www.scrapingdog.com/documentation
       return fetch("https://api.scrapingdog.com/scrape?" + new URLSearchParams({
         api_key: token,
         url,
+        ...settings,
         dynamic: "false",
-        premium: "", // TODO: 'yes' or 'true', string according to docs
       }))
     },
   },
@@ -87,31 +126,27 @@ export const services: Services = {
     tokenHint: "30 chars long, lowercase letters and numbers",
     tokenPlaceholder: "386a...",
     desc: "…",
-    fn: async (url, token) => {
+    settings: {
+      premium_proxies: {
+        type: "boolean",
+        label: "Premium proxies",
+        note: "Premium proxies cost more credits",
+        default: false,
+      },
+      country: {
+        type: "select",
+        label: "Country",
+        note: "Requires premium proxy",
+        default: "us",
+        options: ["us", "ca", "fr", "de", "ge", "il", "it", "mx", "nl", "ru", "es", "se", "uk"],
+      },
+    },
+    fn: async (url, token, settings) => {
       // https://www.scrapingowl.com/documentation
       return fetch("https://api.scrapeowl.com/v1/scrape?" + new URLSearchParams({
         api_key: token,
         url,
-        premium_proxies: "true",
-        /*
-        [
-          "br",
-          "ca",
-          "fr",
-          "de",
-          "ge",
-          "il",
-          "it",
-          "mx",
-          "nl",
-          "ru",
-          "es",
-          "se",
-          "uk",
-          "us"
-        ]
-        */
-        country: "us", // TODO: 'yes' or 'true', string according to docs
+        ...settings,
       }))
     },
   },
@@ -121,11 +156,33 @@ export const services: Services = {
     dashboardLink: "https://app.scraperapi.com",
     tokenPlaceholder: genericTokenPlaceholder,
     desc: "…",
-    fn: async (url, token) => {
+    settings: {
+      premium: {
+        type: "boolean",
+        label: "Premium proxy",
+        note: "Premium proxy costs more credits",
+        default: false,
+      },
+      ultra_premium: {
+        type: "boolean",
+        label: "Ultra Premium proxy",
+        note: "Ultra Premium proxy costs even more credits",
+        default: false,
+      },
+      country_code: {
+        type: "select",
+        label: "Country",
+        note: "Requires premium proxy. Other than US, requires Business plan",
+        default: "us",
+        options: ["us", "ca", "uk", "de", "fr", "es", "br", "mx", "in", "jp", "cn", "au"],
+      },
+    },
+    fn: async (url, token, settings) => {
       // https://www.scraperapi.com/documentation/
       return fetch("http://api.scraperapi.com?" + new URLSearchParams({
         api_key: token,
         url,
+        ...settings,
       }))
     },
   },
@@ -138,14 +195,27 @@ export const services: Services = {
     tokenHint: "40 chars long, lowercase letters and numbers",
     tokenPlaceholder: "739a...",
     desc: "…",
-    fn: async (url, token) => {
+    settings: {
+      premium_proxy: {
+        type: "boolean",
+        label: "Premium proxy",
+        note: "Premium proxy costs more credits",
+        default: false,
+      },
+      antibot: {
+        type: "boolean",
+        label: "Antibot",
+        note: "Antibot costs more credits and requires paid plan",
+        default: false,
+      },
+    },
+    fn: async (url, token, settings) => {
       // https://www.zenrows.com/documentation#overview-node
       // https://app.zenrows.com/builder
       return fetchNoCors("https://api.zenrows.com/v1/?" + new URLSearchParams({
         apikey: token, // beware: all lowercase!
         url,
-        premium_proxy: "false",
-        antibot: "false", // TODO: Enable with paid plan tokens
+        ...settings,
       }))
     },
   },
@@ -163,3 +233,13 @@ export const togglesInitial: FormTogglesValues = Object.entries(services).reduce
 export const configInitial = {
   url: "https://api.github.com/users/strajk",
 }
+
+export const settingsInitial: FormSettingsValues = Object.entries(services)
+  .reduce((accAll, [serviceId, serviceDef]) => {
+    accAll[serviceId] = Object.entries(serviceDef.settings ?? {})
+      .reduce((accOne, [settingKey, settingDef]) => {
+        accOne[settingKey] = settingDef.default
+        return accOne
+      }, {})
+    return accAll
+  }, {})

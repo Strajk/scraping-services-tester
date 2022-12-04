@@ -9,7 +9,7 @@ export function AboutCore () {
       <li>It's a <b>static site</b> – everything is done in your browser, there's no server.</li>
       <li>There is <b>no analytics/tracking</b> – no possibility of accidentally leaking your tokens.</li>
       <li>Only browser's <b>Local storage</b> is used for storing the configuration for convenience.</li>
-      <li>It's a <b>personal project</b> solving my own problem – there's no evil company behind it.</li>
+      <li>It's a <b>personal project</b> solving my own problem – there's no company behind it.</li>
     </ul>
     <p><small>Some links to services are affiliate links</small></p>
   </>
@@ -19,6 +19,12 @@ export function About () {
   // TODO: Better implicit vertical spacing for typography
   return <>
     <AboutCore />
+
+    <Title order={4} mb={4} mt={24}>Notes</Title>
+    <ul>
+      <li>It's a <b>personal tool, not a professional project</b> – there are no guarantees.</li>
+      <li>It's <b>up to you not to do stupid stuff</b>, like trying to hack your own accounts with invalid inputs.</li>
+    </ul>
 
     <Title order={4} mb={4} mt={24}>Credits/Acknowledgements</Title>
     <ul>
