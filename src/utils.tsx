@@ -16,3 +16,9 @@ export function prettyData (data) {
       ? `${Object.keys(data).length} keys`
       : "unknown"
 }
+
+export function removeEmptyStringsFromObject (obj) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v !== ""),
+  )
+}

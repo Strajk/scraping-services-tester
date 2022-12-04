@@ -1,5 +1,6 @@
 import fetchNoCors from "fetch-no-cors"
 import { FormSettingsValues, FormTogglesValues, FormTokensValues, Services } from "./types"
+import { removeEmptyStringsFromObject } from "./utils"
 
 const genericTokenPlaceholder = "abc123..."
 
@@ -144,8 +145,8 @@ Read more about it at <a href="https://github.com/Strajk/scraping-services-teste
         type: "select",
         label: "Country",
         note: "Requires premium proxy",
-        default: "us",
-        options: ["us", "ca", "fr", "de", "ge", "il", "it", "mx", "nl", "ru", "es", "se", "uk"],
+        default: "",
+        options: ["", "us", "ca", "fr", "de", "ge", "il", "it", "mx", "nl", "ru", "es", "se", "uk"],
       },
     },
     fn: async (url, token, settings) => {
@@ -153,7 +154,7 @@ Read more about it at <a href="https://github.com/Strajk/scraping-services-teste
       return fetch("https://api.scrapeowl.com/v1/scrape?" + new URLSearchParams({
         api_key: token,
         url,
-        ...settings,
+        ...removeEmptyStringsFromObject(settings), // important not to send empty params, e.g. `&country=`
       }))
     },
   },
