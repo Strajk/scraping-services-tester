@@ -5,7 +5,7 @@ import "./App.css"
 import { Accordion, ActionIcon, Badge, Button, Card, Checkbox, Container, Divider, Flex, Group, Loader, Popover, Stack, Table, Text, TextInput, Title } from "@mantine/core"
 import { useLocalStorage } from "@mantine/hooks"
 import { showNotification } from "@mantine/notifications"
-import { IconExternalLink, IconEyeCheck, IconEyeOff, IconInfoCircle, IconRocket } from "@tabler/icons"
+import { IconBrandGithub, IconExternalLink, IconEyeCheck, IconEyeOff, IconInfoCircle, IconRocket } from "@tabler/icons"
 
 import { useForm } from "@mantine/form"
 import { openModal } from "@mantine/modals"
@@ -254,7 +254,19 @@ function App () {
     <Container className="App">
 
       {/* TODO: Polish */}
-      <Title order={1} mt={8}>Scraping services tester</Title>
+      <Group position="apart" mt={8}>
+        <Title order={1}>
+          Scraping services tester
+        </Title>
+        <ActionIcon
+          component="a"
+          target="_blank"
+          title="Open GitHub repo"
+          href="https://github.com/Strajk/scraping-services-tester"
+        >
+          <IconBrandGithub />
+        </ActionIcon>
+      </Group>
       <Text color="dimmed" size="sm">Test various scraping/proxy services against specified URL</Text>
 
       <Accordion variant="contained" defaultValue="about" mt={8}>
