@@ -60,7 +60,7 @@ Read more about it at <a href="https://github.com/Strajk/scraping-services-teste
   },
   scrapingbee: {
     name: "ScrapingBee",
-    link: "https://www.scrapingbee.com/", // TODO: Add affiliate, already registered
+    link: "https://www.scrapingbee.com/?fpr=pavel16",
     dashboardLink: "https://app.scrapingbee.com/dashboard",
     tokenLength: 80,
     tokenRegex: /^[A-Z0-9]{80}$/,
