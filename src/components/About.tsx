@@ -1,14 +1,21 @@
 import React from "react"
 import { Mark, Title } from "@mantine/core"
 
-export function AboutCore () {
+export function AboutWhy () {
   return <>
-    <p>You should always be <Mark><b>very cautious</b></Mark> when website asks you any tokens, but:</p>
+    <p>You wanna access/scrape some website/API (hopefully, with good intentions).<br />But, <b>you got blocked</b> – either directly by the target's own anti-bot logic, or by some service they use –  Cloudflare, PerimeterX, Imperva, etc.</p>
+    <p>You can either try to <b>bypass it by yourself</b> by studying various fingerprinting techniques, headers, cookies, browser quirks, proxies, etc. Or you can <b>use a service that handles that your you</b> (Or you can actually combine both approaches for the best results)</p>
+    <p>This tool is for testing and comparing such services. All of them provide free trial accounts – so sign up, obtain a token, paste it to the form below, and, <b>test them all</b>!</p>
+  </>
+}
+export function AboutSecurity () {
+  return <>
+    <p>You should always be <Mark><b>very cautious</b></Mark> when a website asks you for any tokens, but:</p>
     <ul>
       <li>The whole code is <b>open-source</b> on <a href="https://github.com/strajk/scraping-services-tester">GitHub</a> – you can inspect it, or run it yourself on your machine.</li>
       <li>It's a <b>static site</b> – everything is done in your browser, there's no server.</li>
       <li>There is <b>no analytics/tracking</b> – no possibility of accidentally leaking your tokens.</li>
-      <li>Only browser's <b>Local storage</b> is used for storing the configuration for convenience.</li>
+      <li>Only the browser's <b>Local storage</b> is used for storing the configuration for convenience.</li>
       <li>It's a <b>personal project</b> solving my own problem – there's no company behind it.</li>
     </ul>
     <p><small>Some links to services are affiliate links</small></p>
@@ -18,7 +25,7 @@ export function AboutCore () {
 export function About () {
   // TODO: Better implicit vertical spacing for typography
   return <>
-    <AboutCore />
+    <AboutSecurity />
 
     <Title order={4} mb={4} mt={24}>Notes</Title>
     <ul>

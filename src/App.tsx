@@ -12,7 +12,7 @@ import { openModal } from "@mantine/modals"
 import { prettyData, statusColor } from "./utils"
 import { TokensImport } from "./components/TokensImport"
 import { ResultDetail } from "./components/ResultDetail"
-import { About, AboutCore } from "./components/About"
+import { About, AboutSecurity, AboutWhy } from "./components/About"
 import { configInitial, examples, services, settingsInitial, togglesInitial, tokensInitial } from "./constants"
 import { Action, ActionType, FormConfigValues, FormTogglesValues, FormTokensValues, isResultError, isResultWhole, ResultCore, ResultWhole } from "./types"
 import { ServiceSettings } from "./components/ServiceSettings"
@@ -250,6 +250,13 @@ function App () {
     })
   }
 
+  const accordionTitleStyle = {
+    // tighten up
+    paddingTop: 16 - 4,
+    paddingBottom: 16 - 4,
+    fontSize: 14,
+  }
+
   return (
     <Container className="App">
 
@@ -269,16 +276,15 @@ function App () {
       </Group>
       <Text color="dimmed" size="sm">Test various scraping/proxy services against specified URL</Text>
 
-      <Accordion variant="contained" defaultValue="about" mt={8}>
+      <Accordion multiple={true} variant="contained" defaultValue={["about", "security"]} mt={8}>
         <Accordion.Item value="about">
-          <Accordion.Control
-            style={{
-              // tighten up
-              paddingTop: 16 - 4,
-              paddingBottom: 16 - 4,
-              fontSize: 14,
-            }}
-          >
+          <Accordion.Control style={accordionTitleStyle}>
+            <b>🧐 What is this and why does it exist?</b>
+          </Accordion.Control>
+          <Accordion.Panel><AboutWhy /></Accordion.Panel>
+        </Accordion.Item>
+        <Accordion.Item value="security">
+          <Accordion.Control style={accordionTitleStyle}>
             <b>🥷 Why it's ok to input your precious tokens</b>
             {" "}
             <a href="#" onClick={(ev) => {
@@ -286,7 +292,7 @@ function App () {
               ev.stopPropagation() // prevent accordion from toggling
             }}>Read more</a>
           </Accordion.Control>
-          <Accordion.Panel><AboutCore /></Accordion.Panel>
+          <Accordion.Panel><AboutSecurity /></Accordion.Panel>
         </Accordion.Item>
       </Accordion>
 
